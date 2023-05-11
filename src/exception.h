@@ -143,54 +143,97 @@ __FILE__, __LINE__, __FUNCTION__, "Threw the %s:\n\tat %s:%ld, func %s\n\t\
 #o should NOT be nulled as NULL being represented as a value of invalidation\
  in COOL.");}
 
-# ifdef EXCEP_BUFF_MAX
-#  undef EXCEP_BUFF_MAX
-# endif /* EXCEP_BUFF_MAX */
-# define EXCEP_BUFF_MAX 4096L
+#define fail_rtn(o) {if (o == NULL) return -1;}
+#define fail_nortn(o) {if (o == NULL) return;}
+
+# ifndef EXCEP_BUFF_MAX
+#  define EXCEP_BUFF_MAX 4096L
+# endif /* NO EXCEP_BUFF_MAX */
+
+# ifndef EXCEP_ARRAY_MAX
+#  define EXCEP_ARRAY_MAX 1024L
+# endif /* NO EXCEP_ARRAY_MAX */
+
+# ifndef EXCEP_ID_OFFSET
+#  define EXCEP_ID_OFFSET 5000
+# endif /* NO EXCEP_ID_OFFSET */
 
 typedef struct _excep_S
 {
   char _name[EXCEP_BUFF_MAX];
   char _description[EXCEP_BUFF_MAX];
-  int id;
+  int _id;
 } _excep_t;
+
+static _excep_t _excep_arr[EXCEP_ARRAY_MAX] = {};
+static int _excep_arr_len = EXCEP_ARRAY_MAX;
 
 /* By specifying the name & the description, an exception can be added
    once none exception has the same name.
    Fails once any given parameter was null.
+   Returns id to the exception added;
    Throws BufferOverflowException */
-void
+int
 exception_addexcep(char *excep_name, char *description);
 
-/* By specifying the name, an exception can be removed once it exists.
+/* By specifying the name & the description, an exception can be added
+   once none exception has the same name nor the id.
    Fails once any given parameter was null.
    Throws BufferOverflowException */
 void
+exception_addexcep_id(char *excep_name, char *description, int id);
+
+/* By specifying the name, an exception can be removed once it exists.
+   Fails once any given parameter was null.
+   Returns name to the exception removed;
+   Throws BufferOverflowException */
+char *
 exception_removeexcep_byname(char *excep_name);
 
 /* By specifying the id, an exception can be removed once it exists.
    Fails once any given parameter was null.
+   Returns id to the exception removed;
    Throws BufferOverflowException */
-void
+int
 exception_removeexcep_byid(excep_e id);
 
-/* Returns the name to all exceptions */
-char **
+/* Returns all exceptions */
+_excep_t **
 exception_getallexcep();
 
 /* Find desired exception with their names;
    Returns true once found;
            false once NOT found or null was given as EXCEP_NAME;
    Throws BufferOverflowException */
-bool
+int
 exception_findexcep_byname(char *excep_name);
 
 /* Find desired exception with their IDs;
    Returns true once found;
            false once NOT found or null was given as EXCEP_NAME;
    Throws BufferOverflowException */
-bool
+int
 exception_findexcep_byid(excep_e id);
+
+/* Iterate through every element in _excep_arr, util find specified exception.
+   Fails once any given parameter was null.
+   Returns the index of matched exception.
+           -1 once not found. */
+int
+_exception_iteration(_excep_t e);
+
+/* Compare A and B in a quick way.
+   That is, once single character does not match, it stops following operations.
+   Fails once any given parameter was null.
+   Returns matched or not. */
+int
+_exception_quick_match_str(char *a, char *b, bool capital_restricted);
+
+/* Check wether the characters are exactly the same by comparing ASCII value;
+   Fails once any given parameter was null.
+   Returns once A is exactly the same as B. */
+int
+_exception_capital_check(char a, char b, bool capital_restricted);
 
 #ifdef __cplusplus
 __END_DECLS
