@@ -243,7 +243,7 @@ _exception_quick_match_str(char *a, char *b, bool capital_restricted)
 
   for (int i = 0; i < lenA; i ++)
     {
-      if (_exception_capital_check(a[i], b[i], capital_restricted))
+      if (_exception_capital_check(a[i], b[i], capital_restricted != NORMAL))
         return false;
     }
   return true;
