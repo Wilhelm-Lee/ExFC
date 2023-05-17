@@ -37,9 +37,6 @@ static const char *__restrict__ _EXCEP_FMT =
 "Threw the %s:\n\tat %s:%ld, func %s\n";
 static const char *__restrict__ _DEF_EXCEP_FMT = "Threw the %s\n";
 
-# define fail(o, rtn) {if (o == NULL) return (rtn);}
-# define voidfail(o) {if (o == NULL) return;}
-
 # ifndef EXCEP_BUFF_MAX
 #  define EXCEP_BUFF_MAX 4096L
 # endif /* NO EXCEP_BUFF_MAX */
@@ -52,7 +49,25 @@ static const char *__restrict__ _DEF_EXCEP_FMT = "Threw the %s\n";
 #  define EXCEP_ID_OFFSET 1000L
 # endif /* NO EXCEP_ID_OFFSET */
 
-typedef enum _excep_e
+typedef enum excep_return_E
+{
+   /* Target is not found. */
+   MISSING       = -6,
+   /* Certain conditions were not satisfied. */
+   CONDITIONAL   = -5,
+   /* Failed passing through macro "fail". */
+   FAILED        = -4,
+   /* Target holds the same element. */
+   DUPLICATED    = -3,
+   /* Has error occurred. */
+   ABNORMAL      = -2,
+   /* Normally proceeded with no error occurred */
+   NORMAL        = -1
+} excep_return_e;
+
+# define fail(o, rtn) {if (o == NULL) return (rtn);}
+
+typedef enum _excep_E
 {
   Exception = EXCEP_ID_OFFSET,
   InstanceFailureException,
@@ -71,8 +86,8 @@ typedef struct _excep_S
   int _id;
 } _excep_t;
 
-static _excep_t excep_null = (_excep_t){0, 0, 0};
-static _excep_t *__restrict__ excep_nullptr = &excep_null;
+static const _excep_t excep_null = (_excep_t){NULL, NULL, 0};
+static const _excep_t *excep_nullptr = &excep_null;
 
 static _excep_t _excep_arr[EXCEP_ARRAY_MAX] = {};
 static const int _excep_arr_len = EXCEP_ARRAY_MAX;
@@ -81,13 +96,12 @@ static const int _excep_arr_len = EXCEP_ARRAY_MAX;
    Fails once any given parameter was null.
    Returns 0 once same;
            1 once A > B;
-          -1 once A < B;
-          -2 once failed. */
-static __inline__ int
+          -1 once A < B; */
+static inline int
 excep_cmp(_excep_t a, _excep_t b)
 {
-   fail(&a, -2);
-   fail(&b, -2);
+   fail(&a, FAILED);
+   fail(&b, FAILED);
 
    return ((a._id > b._id) ? 1 : (a._id == b._id) ? 0 : -1);
 }
@@ -95,110 +109,113 @@ excep_cmp(_excep_t a, _excep_t b)
 /* This function specifically throw BufferOverflowException once given
    BUFF is longer than EXCEP_BUFF_MAX.
    Fails once any given parameter was null.
+   Returns |FAILED   once failed passing through macro "fail";
+           |NORMAL   once normally proceeded with no error occurred;
+           |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
-void
+excep_return_e
 _exception_buffersize_chk(char *buff);
 
-/* By specifying the name & the description, an exception can be added
-   once none exception has the same name nor the ID.
+/* By specifying the name & the description & the ID, an exception can be added
+   once no same exception exists in advance.
    Fails once any given parameter was null.
-   Returns index to the exception added;
-           -1 once _excep_arr was full;
-           -2 once failed;
-           -3 once _excep_arr had a same exception.
+   Returns |index to the exception added;
+           |CONDITIONAL once _excep_arr was full;
+           |DUPLICATED once _excep_arr had a same element;
+           |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
 int
-exception_addexcep(char *excep_name, char *description);
-
-/* By specifying the name & the description, an exception can be added
-   once none exception has the same name nor the ID.
-   Fails once any given parameter was null;
-   Returns index to the exception added;
-           -1 once _excep_arr was full;
-           -2 once failed;
-           -3 once _excep_arr had a same exception.
-   Throws BufferOverflowException */
-int
-exception_addexcep_id(char *excep_name, char *description, int id);
+exception_addexcep(char *excep_name, char *description, int id);
 
 /* By specifying the name, an exception can be removed once it exists.
    Fails once any given parameter was null.
-   Returns index to the exception removed;
-           -1 once _excep_arr was empty;
-           -2 once failed;
-           -3 once _excep_arr had no desired exception.
+   Returns |index to the exception removed;
+           |CONDITIONAL once _excep_arr was empty;
+           |MISSING once _excep_arr had no desired exception;
+           |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
 int
 exception_removeexcep_byname(char *excep_name);
 
 /* By specifying the id, an exception can be removed once it exists.
    Fails once any given parameter was null.
-   Returns index to the exception removed;
-           -1 once _excep_arr was empty;
-           -2 once failed;
-           -3 once _excep_arr had no desired exception.
+   Returns |index to the exception removed;
+           |CONDITIONAL once _excep_arr was empty;
+           |MISSING once _excep_arr had no desired exception;
+           |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
 int
 exception_removeexcep_byid(int id);
 
-/* Returns all exceptions */
+/* Returns |all exceptions;
+           |$excep_nullptr once _excep_arr is NULL */
 _excep_t *
 exception_getallexcep();
 
-/* Find desired exception with their names;
+/* Find desired exception with its name;
    Fails once any given parameter was null.
-   Returns index of the exception found;
-           -1 once NOT found.
+   Returns |index of the exception found;
+           |MISSING once NOT found;
+           |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
 int
 exception_findexcep_byname(char *excep_name);
 
-/* Find desired exception with their IDs;
+/* Find desired exception with its ID;
    Fails once any given parameter was null.
-   Returns index of the exception found;
-           -1 once NOT found;
-           -2 once failed.
+   Returns |index of the exception found;
+           |MISSING once NOT found;
+           |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
 int
 exception_findexcep_byid(int id);
 
 /* Iterate through every element in _excep_arr, util find specified exception.
    Fails once any given parameter was null.
-   Returns the index of matched exception.
-           -1 once NOT found;
-           -2 once failed. */
+   Returns |index of matched exception.
+           |MISSING once NOT found;
+           |ABNORMAL once $_excep_arr was null; */
 int
 exception_findexcep_byit(_excep_t e);
 
 /* Iterate through every element in _excep_arr, util find the last exception.
-   Returns the index of matched exception.
-           -1 once the whole array was empty. */
-int
+   Returns |index of matched exception.
+           |CONDITIONAL once the whole array was empty;
+           |ABNORMAL once $_excep_arr was null; */
+excep_return_e
 _exception_iteration_last();
 
 /* Iterate through every element in _excep_arr, util find the first exception.
-   Returns the index of matched exception.
-           -1 once the whole array was empty. */
-int
+   Returns |index of matched exception.
+           |CONDITIONAL once the whole array was empty;
+           |ABNORMAL once $_excep_arr was null; */
+excep_return_e
 _exception_iteration_first();
 
-/* Rearrange whole array to make all the elements listed in near-by. */
-void
+/* Rearrange whole array to make all the elements listed in near-by.
+   Returns |Real length of _excep_arr after rearrangement;
+           |ABNORMAL once $_excep_arr was null; */
+int
 _exception_rearrangement();
+
+/* Rearrange whole array to make all the elements listed in near-by without
+   extra space used.
+   Returns |Real length of _excep_arr after rearrangement;
+           |ABNORMAL once $_excep_arr was null; */
+int
+_exception_rearrangement_inplace();
 
 /* Compare A and B in a quick way.
    That is, once single character does not match, it stops following operations.
    Fails once any given parameter was null.
-   Returns matched or not;
-           false once failed. */
-bool
+   Returns |matched or not. */
+excep_return_e
 _exception_quick_match_str(char *a, char *b, bool capital_restricted);
 
 /* Check wether the characters are exactly the same by comparing ASCII value;
-   Fails once any given parameter was null.
-   Returns true once A is exactly the same as B.
-           false once failed. */
-bool
+   Returns |true once A is exactly the same as B.
+           |false once A is not exactly the same as B. */
+excep_return_e
 _exception_capital_check(char a, char b, bool capital_restricted);
 
 /* Example:
@@ -208,7 +225,7 @@ _exception_capital_check(char a, char b, bool capital_restricted);
                                       ~~~^^~~~  ~~~^^~~~  ~~~~^^^^~~~~
            "Errored when instancing %s.\nGiven options is illegal:\n\
            %d, %lf", opt1, opt2); */
-static __inline__ void
+static inline void
 THROW(_excep_t e, const char *__restrict__ __file__, long int __line__,
       const char *__restrict__ __function__, const char *__restrict__ _FMT, ...)
 {
@@ -230,6 +247,12 @@ THROW(_excep_t e, const char *__restrict__ __file__, long int __line__,
   va_end(_vlist);
 
   exit(e._id);
+}
+
+static inline char *
+_exception_generate_description_to_throw(char *raw)
+{
+   /* YOU LEFT HERE */
 }
 
 # ifdef __cplusplus

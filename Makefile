@@ -3,11 +3,11 @@ FLAG = -std=c99 -Wall
 
 NAM = exfc
 
-EXFC = obj/exfc.o
+OBJECTS = obj/exfc.o
 
-all : $(EXFC)
-	$(CC) $(FLAG) -shared -so $(EXFC)
+all : $(OBJECTS)
+	$(CC) $(FLAG) -shared -so $(OBJECTS)
 
 .PHONY : clean
 clean:
-    rm -fv $(EXFC)
+    rm -fv $(OBJECTS)

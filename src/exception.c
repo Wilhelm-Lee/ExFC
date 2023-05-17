@@ -18,95 +18,127 @@
 
 #include "exception.h"
 
-void
+excep_return_e
 _exception_buffersize_chk(char *buff)
 {
-  voidfail(buff);
+  fail(buff, FAILED);
 
-  if (strlen((const char *)buff) > EXCEP_ARRAY_MAX)
+  if (strlen((const char *)buff) > EXCEP_BUFF_MAX)
     {
       THROW((_excep_t){"BufferOverflowException", "", BufferOverflowException},
             __FILE__, __LINE__, __FUNCTION__, _EXCEP_FMT);
     }
+
+  return NORMAL;
 }
 
-int
-exception_addexcep(char *excep_name, char *description)
+excep_return_e
+exception_addexcep(char *excep_name, char *description, int id)
 {
-  fail(excep_name, -2);
-  fail(description, -2);
+  fail(_excep_arr, ABNORMAL);
+  fail(excep_name, FAILED);
+  fail(description, FAILED);
+  fail(&id, FAILED);
 
   _exception_buffersize_chk(excep_name);
   _exception_buffersize_chk(description);
 
   /* Found the duplication, exit. */
-  if (exception_findexcep_byname(excep_name) != -1)
-    return -3;
+  if (exception_findexcep_byname(excep_name) != CONDITIONAL
+      || exception_findexcep_byid(id) != CONDITIONAL)
+    return DUPLICATED;
 
-  _exception_rearrangement();
-  int pivot = _exception_iteration_first();
+  int index = _exception_rearrangement();
 
   /* Array was full */
-  if (pivot == -1)
-    return -1;
+  if (index == _excep_arr_len)
+    return CONDITIONAL;
 
   /* Assign */
-  _excep_arr[pivot]._name = excep_name;
-  _excep_arr[pivot]._description = description;
-  _excep_arr[pivot]._id = pivot + EXCEP_ID_OFFSET;
+  _excep_arr[index]._name = excep_name;
+  _excep_arr[index]._description = description;
+  _excep_arr[index]._id = id;
 
-  return pivot;
+  return index;
 }
 
 int
-exception_addexcep_id(char *excep_name, char *description, int id)
+exception_removeexcep_byname(char *excep_name)
 {
-  fail(excep_name, -2);
-  fail(description, -2);
-  fail(&id, -2);
+  fail(_excep_arr, ABNORMAL);
+  fail(excep_name, FAILED);
 
   _exception_buffersize_chk(excep_name);
-  _exception_buffersize_chk(description);
 
-  /* Found the duplication, exit. */
-  if (exception_findexcep_byname(excep_name) != -1
-      || exception_findexcep_byid(id) != -1)
-    return -3;
+  /* Find the desired exception */
+  int index = exception_findexcep_byname(excep_name);
 
-  _exception_rearrangement();
-  int pivot = _exception_iteration_first();
-
-  /* Array was full */
-  if (pivot == -1)
-    return -1;
+  /* Not found */
+  if (index == MISSING)
+    return MISSING;
 
   /* Assign */
-  _excep_arr[pivot]._name = excep_name;
-  _excep_arr[pivot]._description = description;
-  _excep_arr[pivot]._id = id;
+  _excep_arr[index]._name = NULL;
+  _excep_arr[index]._description = NULL;
+  _excep_arr[index]._id = 0;
 
-  return pivot;
+  return index;
 }
 
 int
-exception_removeexcep_byname(char *excep_name);/* YOU LEFT HERE */
+exception_removeexcep_byid(int id)
+{
+  fail(_excep_arr, ABNORMAL);
+  fail(&id, FAILED);
 
-int
-exception_removeexcep_byid(int id);
+  /* Find the desired exception */
+  int index = exception_findexcep_byid(id);
+
+  /* Not found */
+  if (index == MISSING)
+    return MISSING;
+
+  /* Assign */
+  _excep_arr[index]._name = NULL;
+  _excep_arr[index]._description = NULL;
+  _excep_arr[index]._id = 0;
+
+  return index;
+}
 
 _excep_t *
-exception_getallexcep();
+exception_getallexcep()
+{
+  fail(_excep_arr, (_excep_t*)excep_nullptr);
 
-int
-exception_findexcep_byname(char *excep_name);
+  /* Ensure no gaps exists */
+  int rtnlen = _exception_rearrangement();
 
-int
+  _excep_t rtnarr[rtnlen];
+  _excep_t *rtn = rtnarr;
+
+  for (int i = 0; i < rtnlen; i ++)
+    {
+      rtnarr[i] = _excep_arr[i];
+    }
+
+  return rtn;
+}
+
+excep_return_e
+exception_findexcep_byname(char *excep_name)
+{
+  /* YOU LEFT HERE */
+}
+
+excep_return_e
 exception_findexcep_byid(int id);
 
-int
+excep_return_e
 exception_findexcep_byit(_excep_t e)
 {
-  fail(&e, -1);
+  fail(_excep_arr, ABNORMAL);
+  fail(&e, FAILED);
 
   for (int i = 0; i < _excep_arr_len - 1; i ++)
     {
@@ -115,12 +147,14 @@ exception_findexcep_byit(_excep_t e)
           && (e._id == _excep_arr[i]._id))
         return i;
     }
-  return -1;
+  return MISSING;
 }
 
-int
+excep_return_e
 _exception_iteration_last()
 {
+  fail(_excep_arr, ABNORMAL);
+
   int rtn = -1;
   for (int i = _excep_arr_len - 1; i >= 0; i --)
     {
@@ -132,9 +166,11 @@ _exception_iteration_last()
   return rtn;
 }
 
-int
+excep_return_e
 _exception_iteration_first()
 {
+  fail(_excep_arr, ABNORMAL);
+
   int rtn = -1;
   for (int i = 0; i < _excep_arr_len; i ++)
     {
@@ -146,9 +182,11 @@ _exception_iteration_first()
   return rtn;
 }
 
-void
+int
 _exception_rearrangement()
 {
+  fail(_excep_arr, ABNORMAL);
+
   _excep_t tmp[_excep_arr_len];
 
   int tmp_index = 0;
@@ -167,20 +205,34 @@ _exception_rearrangement()
   /* Apply tmp on _excep_arr */
   for (int i = 0; i < _excep_arr_len; i ++)
     {
-      /* Overwrite previous element by the ones in array tmp. */
+      /*
+         _excep_arr: (len = 19)
+         [1_23456___78_9A__BC] -> real length == 12 elem
+         tmp_arr: (len = 19)
+         [123456789ABC_______] -> real length == 12 elem
+                     ~^ (12th)
+                                  tmp_index == 12
+      */
+      /* Overwrite previous elements by the ones in array tmp. */
       if (i <= tmp_index)
         _excep_arr[i] = tmp[i];
       else /* Erase elements out of range [0, tmp_index] */
         _excep_arr[i] = excep_null;
     }
+  return tmp_index;
 }
 
-bool
+/* Optional extra */
+int
+_exception_rearrangement_inplace();
+
+excep_return_e
 _exception_quick_match_str(char *a, char *b, bool capital_restricted)
 {
-  fail(a, false);
-  fail(b, false);
-  fail(&capital_restricted, false);
+  fail(_excep_arr, ABNORMAL);
+  fail(a, FAILED);
+  fail(b, FAILED);
+  fail(&capital_restricted, FAILED);
 
   int lenA = strlen(a);
   int lenB = strlen(b);
@@ -197,12 +249,10 @@ _exception_quick_match_str(char *a, char *b, bool capital_restricted)
   return true;
 }
 
-bool
+excep_return_e
 _exception_capital_check(char a, char b, bool capital_restricted)
 {
-  fail(&a, false);
-  fail(&b, false);
-  fail(&capital_restricted, false);
+  fail(_excep_arr, ABNORMAL);
 
   return ((capital_restricted) ? (a == b) : ((a - b) == 32));
 }
