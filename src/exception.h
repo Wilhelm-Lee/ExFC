@@ -114,7 +114,8 @@ exception_cmp(_excep_t *a, _excep_t *b)
    Returns |FAILED   once failed passing through macro "fail";
            |ABNORMAL once $_excep_arr was null;
            |NORMAL   once normally proceeded with no error occurred;
-   Throws BufferOverflowException */
+   Throws BufferOverflowException;
+          InvalidNullPointerException; */
 excep_return_e
 _exception_buffersize_chk(char *buff);
 
@@ -125,7 +126,8 @@ _exception_buffersize_chk(char *buff);
            |CONDITIONAL once _excep_arr was full;
            |DUPLICATED once _excep_arr had a same element;
            |ABNORMAL once $_excep_arr was null;
-   Throws BufferOverflowException */
+   Throws BufferOverflowException;
+          InvalidNullPointerException; */
 int
 exception_addexcep(char *excep_name, char *description, int id);
 
@@ -136,7 +138,8 @@ exception_addexcep(char *excep_name, char *description, int id);
            |CONDITIONAL once _excep_arr was empty;
            |FAILED once id < 0;
            |ABNORMAL once $_excep_arr was null;
-   Throws BufferOverflowException */
+   Throws BufferOverflowException;
+          InvalidNullPointerException; */
 int
 exception_removeexcep_byname(char *excep_name);
 
@@ -146,13 +149,14 @@ exception_removeexcep_byname(char *excep_name);
            |MISSING once _excep_arr had no desired exception;
            |CONDITIONAL once _excep_arr was empty;
            |ABNORMAL once $_excep_arr was null;
-   Throws BufferOverflowException */
+   Throws BufferOverflowException;
+          InvalidNullPointerException; */
 int
 exception_removeexcep_byid(int id);
 
 /* Returns |all exceptions;
            |$excep_nullptr once _excep_arr is NULL;
-           |FAILED once id < 0; */
+   Throws InvalidNullPointerException; */
 _excep_t *
 exception_getallexcep();
 
@@ -161,7 +165,8 @@ exception_getallexcep();
    Returns |index of the exception found;
            |MISSING once NOT found;
            |ABNORMAL once $_excep_arr was null;
-   Throws BufferOverflowException */
+   Throws BufferOverflowException;
+          InvalidNullPointerException; */
 int
 exception_findexcep_byname(char *excep_name);
 
@@ -170,7 +175,8 @@ exception_findexcep_byname(char *excep_name);
    Returns |index of the exception found;
            |MISSING once NOT found;
            |ABNORMAL once $_excep_arr was null;
-   Throws BufferOverflowException */
+   Throws BufferOverflowException;
+          InvalidNullPointerException; */
 int
 exception_findexcep_byid(int id);
 
@@ -181,34 +187,39 @@ exception_findexcep_byid(int id);
             which is not allowed to operate on it;
            |MISSING once NOT found;
            |FAILED once id < 0;
-           |ABNORMAL once $_excep_arr was null; */
+           |ABNORMAL once $_excep_arr was null;
+   Throws InvalidNullPointerException; */
 int
 exception_findexcep_byit(_excep_t e);
 
 /* Iterate through every element in _excep_arr, util find the last exception.
    Returns |index of matched exception.
            |CONDITIONAL once the whole array was empty;
-           |ABNORMAL once $_excep_arr was null; */
+           |ABNORMAL once $_excep_arr was null;
+   Throws InvalidNullPointerException; */
 excep_return_e
 _exception_iteration_last();
 
 /* Iterate through every element in _excep_arr, util find the first exception.
    Returns |index of matched exception.
            |CONDITIONAL once the whole array was empty;
-           |ABNORMAL once $_excep_arr was null; */
+           |ABNORMAL once $_excep_arr was null;
+   Throws InvalidNullPointerException; */
 excep_return_e
 _exception_iteration_first();
 
 /* Rearrange whole array to make all the elements listed in near-by.
    Returns |Real length of _excep_arr after rearrangement;
-           |ABNORMAL once $_excep_arr was null; */
+           |ABNORMAL once $_excep_arr was null;
+   Throws InvalidNullPointerException; */
 excep_return_e
 _exception_rearrangement();
 
 /* Rearrange whole array to make all the elements listed in near-by without
    extra space used.
    Returns |Real length of _excep_arr after rearrangement;
-           |ABNORMAL once $_excep_arr was null; */
+           |ABNORMAL once $_excep_arr was null;
+   Throws InvalidNullPointerException; */
 excep_return_e
 _exception_rearrangement_inplace();
 

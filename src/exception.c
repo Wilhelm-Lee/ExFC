@@ -387,8 +387,6 @@ _exception_quick_match_str(char *a, char *b, bool capital_restricted)
   fail(b, FAILED);
   fail(&capital_restricted, FAILED);
 
-  _exception_nullchk();
-
   const unsigned long lenA = strlen(a);
   const unsigned long lenB = strlen(b);
 
