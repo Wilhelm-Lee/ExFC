@@ -19,11 +19,11 @@
 #ifndef _EXCEPTION_H
 # define _EXCEPTION_H
 
+# include <stdarg.h>
+# include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
-# include <stdarg.h>
-# include <stdbool.h>
 
 # ifdef __cplusplus
 __BEGIN_DECLS
@@ -33,9 +33,9 @@ __BEGIN_DECLS
    par2="File"=__FILE__;
    par3="Line"=__LINE__;
    par4="Function"=__FUNCTION__ */
-static const char *__restrict__ _EXCEP_FMT =
-"Threw the %s:\n\tat %s:%ld, func %s\n";
-static const char *__restrict__ _DEF_EXCEP_FMT = "Threw the %s\n";
+static const char *__restrict__ EXCEP_FMT =
+"Threw the %s:\n\tat %s:%ld, func %s\n\"%s\"";
+static const char *__restrict__ DEF_EXCEP_FMT = "Threw the %s\n";
 
 # ifndef EXCEP_BUFF_MAX
 #  define EXCEP_BUFF_MAX 4096L
@@ -51,21 +51,23 @@ static const char *__restrict__ _DEF_EXCEP_FMT = "Threw the %s\n";
 
 typedef enum excep_return_E
 {
-   /* Target is not found. */
-   MISSING       = -6,
-   /* Certain conditions were not satisfied. */
-   CONDITIONAL   = -5,
-   /* Failed passing through macro "fail". */
-   FAILED        = -4,
-   /* Target holds the same element. */
-   DUPLICATED    = -3,
-   /* Has error occurred. */
-   ABNORMAL      = -2,
-   /* Normally proceeded with no error occurred */
-   NORMAL        = -1
+  /* Target was excep_null, which is not allowed to operate on it. */
+  EXCEP_NULL    = -700,
+  /* Target is not found. */
+  MISSING       = -600,
+  /* Certain conditions were not satisfied. */
+  CONDITIONAL   = -500,
+  /* Failed passing through macro "fail". */
+  FAILED        = -400,
+  /* Target holds the same element. */
+  DUPLICATED    = -300,
+  /* Has error occurred. */
+  ABNORMAL      = -200,
+  /* Normally proceeded with no error occurred */
+  NORMAL        = -100
 } excep_return_e;
 
-# define fail(o, rtn) {if (o == NULL) return (rtn);}
+# define fail(o, rtn) {if ((o) == NULL) return (rtn);}
 
 typedef enum _excep_E
 {
@@ -84,7 +86,7 @@ typedef struct _excep_S
   char *_name;
   char *_description;
   int _id;
-} _excep_t;
+} __attribute__((aligned(32))) _excep_t;
 
 static const _excep_t excep_null = (_excep_t){NULL, NULL, 0};
 static const _excep_t *excep_nullptr = &excep_null;
@@ -92,26 +94,26 @@ static const _excep_t *excep_nullptr = &excep_null;
 static _excep_t _excep_arr[EXCEP_ARRAY_MAX] = {};
 static const int _excep_arr_len = EXCEP_ARRAY_MAX;
 
-/* Compare two exception:_excep_t
-   Fails once any given parameter was null.
+/* Compare two exception by their ID;
+   Fails once any given parameter was null;
    Returns 0 once same;
            1 once A > B;
           -1 once A < B; */
 static inline int
-excep_cmp(_excep_t a, _excep_t b)
+exception_cmp(_excep_t *a, _excep_t *b)
 {
-   fail(&a, FAILED);
-   fail(&b, FAILED);
+  fail(a, FAILED);
+  fail(b, FAILED);
 
-   return ((a._id > b._id) ? 1 : (a._id == b._id) ? 0 : -1);
+  return ((a->_id > b->_id) ? 1 : (a->_id == b->_id) ? 0 : -1);
 }
 
 /* This function specifically throw BufferOverflowException once given
    BUFF is longer than EXCEP_BUFF_MAX.
    Fails once any given parameter was null.
    Returns |FAILED   once failed passing through macro "fail";
-           |NORMAL   once normally proceeded with no error occurred;
            |ABNORMAL once $_excep_arr was null;
+           |NORMAL   once normally proceeded with no error occurred;
    Throws BufferOverflowException */
 excep_return_e
 _exception_buffersize_chk(char *buff);
@@ -130,8 +132,9 @@ exception_addexcep(char *excep_name, char *description, int id);
 /* By specifying the name, an exception can be removed once it exists.
    Fails once any given parameter was null.
    Returns |index to the exception removed;
-           |CONDITIONAL once _excep_arr was empty;
            |MISSING once _excep_arr had no desired exception;
+           |CONDITIONAL once _excep_arr was empty;
+           |FAILED once id < 0;
            |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
 int
@@ -140,15 +143,16 @@ exception_removeexcep_byname(char *excep_name);
 /* By specifying the id, an exception can be removed once it exists.
    Fails once any given parameter was null.
    Returns |index to the exception removed;
-           |CONDITIONAL once _excep_arr was empty;
            |MISSING once _excep_arr had no desired exception;
+           |CONDITIONAL once _excep_arr was empty;
            |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException */
 int
 exception_removeexcep_byid(int id);
 
 /* Returns |all exceptions;
-           |$excep_nullptr once _excep_arr is NULL */
+           |$excep_nullptr once _excep_arr is NULL;
+           |FAILED once id < 0; */
 _excep_t *
 exception_getallexcep();
 
@@ -173,7 +177,10 @@ exception_findexcep_byid(int id);
 /* Iterate through every element in _excep_arr, util find specified exception.
    Fails once any given parameter was null.
    Returns |index of matched exception.
+           |EXCEP_NULL once $e was excep_null,
+            which is not allowed to operate on it;
            |MISSING once NOT found;
+           |FAILED once id < 0;
            |ABNORMAL once $_excep_arr was null; */
 int
 exception_findexcep_byit(_excep_t e);
@@ -195,20 +202,21 @@ _exception_iteration_first();
 /* Rearrange whole array to make all the elements listed in near-by.
    Returns |Real length of _excep_arr after rearrangement;
            |ABNORMAL once $_excep_arr was null; */
-int
+excep_return_e
 _exception_rearrangement();
 
 /* Rearrange whole array to make all the elements listed in near-by without
    extra space used.
    Returns |Real length of _excep_arr after rearrangement;
            |ABNORMAL once $_excep_arr was null; */
-int
+excep_return_e
 _exception_rearrangement_inplace();
 
 /* Compare A and B in a quick way.
    That is, once single character does not match, it stops following operations.
    Fails once any given parameter was null.
-   Returns |matched or not. */
+   Returns |1 once matched;
+           |0 once did not match. */
 excep_return_e
 _exception_quick_match_str(char *a, char *b, bool capital_restricted);
 
@@ -226,33 +234,59 @@ _exception_capital_check(char a, char b, bool capital_restricted);
            "Errored when instancing %s.\nGiven options is illegal:\n\
            %d, %lf", opt1, opt2); */
 static inline void
-THROW(_excep_t e, const char *__restrict__ __file__, long int __line__,
-      const char *__restrict__ __function__, const char *__restrict__ _FMT, ...)
+THROW(_excep_t e, const char *__restrict__ _file_, long int __line__,
+      const char *__restrict__ _function_, const char *__restrict__ FMT, ...)
 {
-  if (_FMT == NULL)
+  if (FMT == NULL)
     {
-      fprintf(stderr, _DEF_EXCEP_FMT, e._name);
+      (void)fprintf(stderr, DEF_EXCEP_FMT, e._name);
       exit(e._id);
     }
 
-  /* Output secondary description about the thrown exception. */
+  /* Output within secondary format on the thrown exception. */
   va_list _vlist;
-  va_start(_vlist, _FMT);
-  fprintf(stderr, ((__file__ == NULL && __line__ == -1 && __function__ == NULL)
-                   ? _DEF_EXCEP_FMT
+  va_start(_vlist, FMT);
+  (void)fprintf(stderr, ((_file_ == NULL && __line__ == -1 && _function_ == NULL)
+                   ? DEF_EXCEP_FMT
                    /* Ignore _FMT when outputting the exception title.
                       Use _EXCEP_FMT instead. */
-                   : _EXCEP_FMT), e._name, __file__, __line__, __function__);
-  vfprintf(stderr, _FMT, _vlist);
+                   : EXCEP_FMT), e._name, _file_, __line__, _function_,
+                                  e._description);
+  (void)vfprintf(stderr, FMT, _vlist);
   va_end(_vlist);
 
   exit(e._id);
 }
 
-static inline char *
-_exception_generate_description_to_throw(char *raw)
+static inline excep_return_e
+_exception_swap(_excep_t *a, _excep_t *b)
 {
-   /* YOU LEFT HERE */
+  fail(a, FAILED);
+  fail(b, FAILED);
+
+  _excep_t *c = a;
+  a = b;
+  b = c;
+
+  return NORMAL;
+}
+
+static inline void
+_exception_nullchk()
+{
+  for (int i = 0; i < _excep_arr_len; i++)
+    {
+      if (&_excep_arr[i] == NULL)
+        {
+          /* Null check */
+          THROW((_excep_t){"InvalidNullPointerException",
+                           "When operating on "
+                           "elements from _excep_arr, NONE element should "
+                           "directly be NULL.",
+                           InvalidNullPointerException},
+                __FILE__, __LINE__, __FUNCTION__, EXCEP_FMT);
+        }
+    }
 }
 
 # ifdef __cplusplus

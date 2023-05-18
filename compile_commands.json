@@ -1,0 +1,5 @@
+{
+    "$schema": {
+        "CompilerFlags": ["-std=c99", "-Wall"]
+    }
+}
