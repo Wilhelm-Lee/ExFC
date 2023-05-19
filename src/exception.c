@@ -330,7 +330,8 @@ _exception_rearrangement_inplace()
   for (register int i = 1; i < _excep_arr_len; i ++)
     {
       /* A not empty element */
-      int compare_this = exception_cmp(&_excep_arr[i], (_excep_t *)excep_nullptr);
+      int compare_this = exception_cmp(&_excep_arr[i],
+                                       (_excep_t *)excep_nullptr);
       int compare_prev = exception_cmp(&_excep_arr[i - 1],
                                        (_excep_t *)excep_nullptr);
 
@@ -365,9 +366,9 @@ _exception_rearrangement_inplace()
             {
               /* End the process */
               break;
-              /* If it was NOT because of reaching at the end. */
-              continue;
             }
+          /* If it was NOT because of reaching at the end. */
+          continue;
         }
 
       /* While this element is empty. */
