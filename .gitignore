@@ -53,3 +53,11 @@ dkms.conf
 
 # VSCode
 .vscode/
+
+# Project ExFC
+bin/
+*test*
+compile_commands.json
+
+# Environmental
+*clangd*
