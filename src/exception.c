@@ -27,7 +27,7 @@ _exception_buffersize_chk(char *buff)
 
   if (strlen((const char *)buff) > EXCEP_BUFF_MAX)
     {
-      THROW((_excep_t){"BufferOverflowException", "", BufferOverflowException},
+      THROW(&(_excep_t){"BufferOverflowException", "", BufferOverflowException},
             __FILE__, __LINE__, __FUNCTION__, EXCEP_FMT);
     }
 
@@ -413,4 +413,17 @@ _exception_capital_check(char a, char b, bool capital_restricted)
   fail(_excep_arr, ABNORMAL);
 
   return ((capital_restricted) ? (a == b) : ((a - b) == ('a' - 'A')));
+}
+
+excep_return_e
+_exception_swap(_excep_t *a, _excep_t *b)
+{
+  fail(a, FAILED);
+  fail(b, FAILED);
+
+  _excep_t *c = a;
+  a = b;
+  b = c;
+
+  return NORMAL;
 }

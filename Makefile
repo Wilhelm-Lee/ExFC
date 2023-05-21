@@ -1,5 +1,5 @@
 CC = /bin/gcc
-FLAG = -std=c99 -Wall
+FLAG = -std=c99 -Wall -g
 
 NAM = exfc
 
@@ -14,10 +14,10 @@ all : $(OBJECTS)
 	$(CC) $(FLAG) -shared -so $(OBJECTS)
 
 build/src/exception.o: src/exception.c
-	$(CC) $(FLAG) src/exception.c -o build/src/exception.o
+	$(CC) $(FLAG) -c src/exception.c -o build/src/exception.o
 
 build/src/test.o : src/test.c
-	$(CC) $(FLAG) src/test.c -o build/src/test.o
+	$(CC) $(FLAG) -c src/test.c -o build/src/test.o
 
 .PHONY : test
 test: build/src/test.o build/src/exception.o

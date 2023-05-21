@@ -34,19 +34,19 @@ __BEGIN_DECLS
    par3="Line"=__LINE__;
    par4="Function"=__FUNCTION__ */
 static const char *__restrict__ EXCEP_FMT =
-"Threw the %s:\n\tat %s:%ld, func %s\n\"%s\"";
+"Threw the %s:\n\tat %s:%ld, func %s\n\"%s\"\n";
 static const char *__restrict__ DEF_EXCEP_FMT = "Threw the %s\n";
 
 # ifndef EXCEP_BUFF_MAX
-#  define EXCEP_BUFF_MAX 4096L
+#  define EXCEP_BUFF_MAX 4096
 # endif /* NO EXCEP_BUFF_MAX */
 
 # ifndef EXCEP_ARRAY_MAX
-#  define EXCEP_ARRAY_MAX 1024L
+#  define EXCEP_ARRAY_MAX 511
 # endif /* NO EXCEP_ARRAY_MAX */
 
 # ifndef EXCEP_ID_OFFSET
-#  define EXCEP_ID_OFFSET 1000L
+#  define EXCEP_ID_OFFSET 1
 # endif /* NO EXCEP_ID_OFFSET */
 
 typedef enum excep_return_E
@@ -86,7 +86,7 @@ typedef struct _excep_S
   char *_name;
   char *_description;
   int _id;
-} __attribute__((aligned(32))) _excep_t;
+} _excep_t;
 
 static const _excep_t excep_null = (_excep_t){NULL, NULL, 0};
 static const _excep_t *excep_nullptr = &excep_null;
@@ -245,42 +245,27 @@ _exception_capital_check(char a, char b, bool capital_restricted);
            "Errored when instancing %s.\nGiven options is illegal:\n\
            %d, %lf", opt1, opt2); */
 static inline void
-THROW(_excep_t e, const char *__restrict__ _file_, long int __line__,
-      const char *__restrict__ _function_, const char *__restrict__ FMT, ...)
+THROW(_excep_t *e, const char *__restrict__ _file_, long int _line_,
+      const char *__restrict__ _function_, const char *__restrict__ FMT)
 {
   if (FMT == NULL)
     {
-      (void)fprintf(stderr, DEF_EXCEP_FMT, e._name);
-      exit(e._id);
+      (void)fprintf(stderr, DEF_EXCEP_FMT, e->_name);
+      exit(e->_id);
     }
 
-  /* Output within secondary format on the thrown exception. */
-  va_list _vlist;
-  va_start(_vlist, FMT);
-  (void)fprintf(stderr, ((_file_ == NULL && __line__ == -1 && _function_ == NULL)
+  (void)fprintf(stderr, ((_file_ == NULL && _line_ == -1 && _function_ == NULL)
                    ? DEF_EXCEP_FMT
                    /* Ignore _FMT when outputting the exception title.
                       Use _EXCEP_FMT instead. */
-                   : EXCEP_FMT), e._name, _file_, __line__, _function_,
-                                  e._description);
-  (void)vfprintf(stderr, FMT, _vlist);
-  va_end(_vlist);
+                   : EXCEP_FMT), e->_name, _file_, _line_, _function_,
+                                 e->_description);
 
-  exit(e._id);
+  exit(e->_id);
 }
 
-static inline excep_return_e
-_exception_swap(_excep_t *a, _excep_t *b)
-{
-  fail(a, FAILED);
-  fail(b, FAILED);
-
-  _excep_t *c = a;
-  a = b;
-  b = c;
-
-  return NORMAL;
-}
+excep_return_e
+_exception_swap(_excep_t *a, _excep_t *b);
 
 static inline void
 _exception_nullchk()
@@ -290,7 +275,7 @@ _exception_nullchk()
       if (&_excep_arr[i] == NULL)
         {
           /* Null check */
-          THROW((_excep_t){"InvalidNullPointerException",
+          THROW(&(_excep_t){"InvalidNullPointerException",
                            "When operating on "
                            "elements from _excep_arr, NONE element should "
                            "directly be NULL.",
