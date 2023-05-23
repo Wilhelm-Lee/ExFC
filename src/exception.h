@@ -49,10 +49,16 @@ static const char *__restrict__ DEF_EXCEP_FMT = "Threw the %s\n";
 #  define EXCEP_ID_OFFSET 1
 # endif /* NO EXCEP_ID_OFFSET */
 
+typedef enum excep_compare_E
+{
+  LESS          = -4,
+  GREATER       = -3,
+  DIFFERENT     = -2,
+  IDENTICAL     = -1,
+} excep_compare_e;
+
 typedef enum excep_return_E
 {
-  /* Target was excep_null, which is not allowed to operate on it. */
-  EXCEP_NULL    = -700,
   /* Target is not found. */
   MISSING       = -600,
   /* Certain conditions were not satisfied. */
@@ -64,10 +70,12 @@ typedef enum excep_return_E
   /* Has error occurred. */
   ABNORMAL      = -200,
   /* Normally proceeded with no error occurred */
-  NORMAL        = -100
+  NORMAL        = -100,
+
 } excep_return_e;
 
 # define fail(o, rtn) {if ((o) == NULL) return (rtn);}
+# define trans(v, e) {if ((v) == (e)) return (e);}
 
 typedef enum _excep_E
 {
@@ -86,38 +94,27 @@ typedef struct _excep_S
   char *_name;
   char *_description;
   int _id;
-} _excep_t;
+} __attribute__((packed)) _excep_t;
 
-static const _excep_t excep_null = (_excep_t){NULL, NULL, 0};
+static const _excep_t excep_null = (_excep_t){"", "", 0};
 static const _excep_t *excep_nullptr = &excep_null;
 
 static _excep_t _excep_arr[EXCEP_ARRAY_MAX] = {};
-static const int _excep_arr_len = EXCEP_ARRAY_MAX;
+static const int _excep_arr_len = EXCEP_ARRAY_MAX;;
 
 /* Compare two exception by their ID;
    Fails once any given parameter was null;
-   Returns 0 once same;
-           1 once A > B;
-          -1 once A < B; */
+   Returns |IDENTICAL once A = B;
+           |GREATER   once A > B;
+           |LESS      once A < B; */
 static inline int
 exception_cmp(_excep_t *a, _excep_t *b)
 {
   fail(a, FAILED);
   fail(b, FAILED);
 
-  return ((a->_id > b->_id) ? 1 : (a->_id == b->_id) ? 0 : -1);
+  return ((a->_id > b->_id) ? GREATER : (a->_id == b->_id) ? IDENTICAL : LESS);
 }
-
-/* This function specifically throw BufferOverflowException once given
-   BUFF is longer than EXCEP_BUFF_MAX.
-   Fails once any given parameter was null.
-   Returns |FAILED   once failed passing through macro "fail";
-           |ABNORMAL once $_excep_arr was null;
-           |NORMAL   once normally proceeded with no error occurred;
-   Throws BufferOverflowException;
-          InvalidNullPointerException; */
-excep_return_e
-_exception_buffersize_chk(char *buff);
 
 /* By specifying the name & the description & the ID, an exception can be added
    once no same exception exists in advance.
@@ -129,7 +126,7 @@ _exception_buffersize_chk(char *buff);
    Throws BufferOverflowException;
           InvalidNullPointerException; */
 int
-exception_addexcep(char *excep_name, char *description, int id);
+exception_addexcep(const char *excep_name, const char *description, int id);
 
 /* By specifying the name, an exception can be removed once it exists.
    Fails once any given parameter was null.
@@ -141,7 +138,7 @@ exception_addexcep(char *excep_name, char *description, int id);
    Throws BufferOverflowException;
           InvalidNullPointerException; */
 int
-exception_removeexcep_byname(char *excep_name);
+exception_removeexcep_byname(const char *excep_name);
 
 /* By specifying the id, an exception can be removed once it exists.
    Fails once any given parameter was null.
@@ -168,7 +165,7 @@ exception_getallexcep();
    Throws BufferOverflowException;
           InvalidNullPointerException; */
 int
-exception_findexcep_byname(char *excep_name);
+exception_findexcep_byname(const char *excep_name);
 
 /* Find desired exception with its ID;
    Fails once any given parameter was null.
@@ -186,7 +183,8 @@ exception_findexcep_byid(int id);
            |EXCEP_NULL once $e was excep_null,
             which is not allowed to operate on it;
            |MISSING once NOT found;
-           |FAILED once id < 0;
+           |FAILED once id < 0
+                   once operating target is $excep_null;
            |ABNORMAL once $_excep_arr was null;
    Throws InvalidNullPointerException; */
 int
@@ -197,7 +195,7 @@ exception_findexcep_byit(_excep_t e);
            |CONDITIONAL once the whole array was empty;
            |ABNORMAL once $_excep_arr was null;
    Throws InvalidNullPointerException; */
-excep_return_e
+int
 _exception_iteration_last();
 
 /* Iterate through every element in _excep_arr, util find the first exception.
@@ -205,14 +203,14 @@ _exception_iteration_last();
            |CONDITIONAL once the whole array was empty;
            |ABNORMAL once $_excep_arr was null;
    Throws InvalidNullPointerException; */
-excep_return_e
+int
 _exception_iteration_first();
 
 /* Rearrange whole array to make all the elements listed in near-by.
    Returns |Real length of _excep_arr after rearrangement;
            |ABNORMAL once $_excep_arr was null;
    Throws InvalidNullPointerException; */
-excep_return_e
+int
 _exception_rearrangement();
 
 /* Rearrange whole array to make all the elements listed in near-by without
@@ -220,22 +218,41 @@ _exception_rearrangement();
    Returns |Real length of _excep_arr after rearrangement;
            |ABNORMAL once $_excep_arr was null;
    Throws InvalidNullPointerException; */
-excep_return_e
+int
 _exception_rearrangement_inplace();
 
 /* Compare A and B in a quick way.
    That is, once single character does not match, it stops following operations.
-   Fails once any given parameter was null.
-   Returns |1 once matched;
-           |0 once did not match. */
-excep_return_e
-_exception_quick_match_str(char *a, char *b, bool capital_restricted);
+   Fails once any given parameter was null, except $capital_restricted.
+   Returns |IDENTICAL once matched;
+           |DIFFERENT once did not match. */
+int
+_exception_quick_match_str(const char *a, const char *b,
+                           bool capital_restricted);
 
 /* Check wether the characters are exactly the same by comparing ASCII value;
-   Returns |true once A is exactly the same as B.
-           |false once A is not exactly the same as B. */
-excep_return_e
+   Returns |IDENTICAL once A is exactly the same as B.
+           |DIFFERENT once A is not exactly the same as B. */
+int
 _exception_capital_check(char a, char b, bool capital_restricted);
+
+/* This function specifically throw BufferOverflowException once given
+   BUFF is longer than EXCEP_BUFF_MAX.
+   Fails once any given parameter was null.
+   Returns |FAILED   once failed passing through macro "fail";
+           |ABNORMAL once $_excep_arr was null;
+           |NORMAL   once normally proceeded with no error occurred;
+   Throws BufferOverflowException;
+          InvalidNullPointerException; */
+int
+_exception_buffersize_chk(char *buff);
+
+/* Swap specified two element from $_excep_arr.
+   Fails once any given parameter was null.
+   Returns |FAILED once failed passing through macro "fail";
+           |NORMAL normally proceeded with no error occurred; */
+int
+_exception_swap(_excep_t *a, _excep_t *b);
 
 /* Example:
       Required Macros:                ___M1___  ___M2___  _____M3_____
@@ -262,27 +279,6 @@ THROW(_excep_t *e, const char *__restrict__ _file_, long int _line_,
                                  e->_description);
 
   exit(e->_id);
-}
-
-excep_return_e
-_exception_swap(_excep_t *a, _excep_t *b);
-
-static inline void
-_exception_nullchk()
-{
-  for (int i = 0; i < _excep_arr_len; i++)
-    {
-      if (&_excep_arr[i] == NULL)
-        {
-          /* Null check */
-          THROW(&(_excep_t){"InvalidNullPointerException",
-                           "When operating on "
-                           "elements from _excep_arr, NONE element should "
-                           "directly be NULL.",
-                           InvalidNullPointerException},
-                __FILE__, __LINE__, __FUNCTION__, EXCEP_FMT);
-        }
-    }
 }
 
 # ifdef __cplusplus

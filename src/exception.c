@@ -18,24 +18,8 @@
 
 #include "exception.h"
 
-excep_return_e
-_exception_buffersize_chk(char *buff)
-{
-  fail(buff, FAILED);
-
-  _exception_nullchk();
-
-  if (strlen((const char *)buff) > EXCEP_BUFF_MAX)
-    {
-      THROW(&(_excep_t){"BufferOverflowException", "", BufferOverflowException},
-            __FILE__, __LINE__, __FUNCTION__, EXCEP_FMT);
-    }
-
-  return NORMAL;
-}
-
-excep_return_e
-exception_addexcep(char *excep_name, char *description, int id)
+int
+exception_addexcep(const char *excep_name, const char *description, int id)
 {
   if (id < 0)
     {
@@ -47,59 +31,58 @@ exception_addexcep(char *excep_name, char *description, int id)
   fail(description, FAILED);
   fail(&id, FAILED);
 
-  _exception_nullchk();
+  _exception_buffersize_chk((char *)excep_name);
+  _exception_buffersize_chk((char *)description);
 
-  _exception_buffersize_chk(excep_name);
-  _exception_buffersize_chk(description);
+  const int byname = exception_findexcep_byname(excep_name);
+  const int byid = exception_findexcep_byid(id);
+
+  trans(byname, FAILED);
+  trans(byid, ABNORMAL);
 
   /* Found the duplication, exit. */
-  if (exception_findexcep_byname(excep_name) != CONDITIONAL
-      || exception_findexcep_byid(id) != CONDITIONAL)
+  if (byname != MISSING || byid != MISSING)
     {
       return DUPLICATED;
     }
 
-  int index = _exception_rearrangement();
+  /* Ensure no gaps exists */
+  int rearrange = _exception_rearrangement();
 
   /* Array was full */
-  if (index == _excep_arr_len)
+  if (rearrange == _excep_arr_len)
     {
       return CONDITIONAL;
     }
 
   /* Assign */
-  _excep_arr[index]._name = excep_name;
-  _excep_arr[index]._description = description;
-  _excep_arr[index]._id = id;
+  _excep_arr[rearrange]._name = (char *)excep_name;
+  _excep_arr[rearrange]._description = (char *)description;
+  _excep_arr[rearrange]._id = id;
 
-  return index;
+  return rearrange;
 }
 
 int
-exception_removeexcep_byname(char *excep_name)
+exception_removeexcep_byname(const char *excep_name)
 {
   fail(_excep_arr, ABNORMAL);
   fail(excep_name, FAILED);
 
-  _exception_nullchk();
-
-  _exception_buffersize_chk(excep_name);
+  _exception_buffersize_chk((char *)excep_name);
 
   /* Find the desired exception */
-  int index = exception_findexcep_byname(excep_name);
+  int byname = exception_findexcep_byname(excep_name);
 
   /* Not found */
-  if (index == MISSING)
-    {
-      return MISSING;
-    }
+  trans(byname, MISSING);
 
   /* Assign */
-  _excep_arr[index]._name = NULL;
-  _excep_arr[index]._description = NULL;
-  _excep_arr[index]._id = 0;
+  _excep_arr[byname]._name = NULL;
+  _excep_arr[byname]._description = NULL;
+  _excep_arr[byname]._id = 0;
 
-  return index;
+  return byname;
 }
 
 int
@@ -113,23 +96,18 @@ exception_removeexcep_byid(int id)
   fail(_excep_arr, ABNORMAL);
   fail(&id, FAILED);
 
-  _exception_nullchk();
-
   /* Find the desired exception */
-  int index = exception_findexcep_byid(id);
+  int byid = exception_findexcep_byid(id);
 
   /* Not found */
-  if (index == MISSING)
-    {
-      return MISSING;
-    }
+  trans(byid, MISSING);
 
   /* Assign */
-  _excep_arr[index]._name = NULL;
-  _excep_arr[index]._description = NULL;
-  _excep_arr[index]._id = 0;
+  _excep_arr[byid]._name = NULL;
+  _excep_arr[byid]._description = NULL;
+  _excep_arr[byid]._id = 0;
 
-  return index;
+  return byid;
 }
 
 _excep_t *
@@ -137,15 +115,13 @@ exception_getallexcep()
 {
   fail(_excep_arr, (_excep_t*)excep_nullptr);
 
-  _exception_nullchk();
-
   /* Ensure no gaps exists */
-  int rtnlen = _exception_rearrangement();
+  int rearrange = _exception_rearrangement();
 
-  _excep_t rtnarr[rtnlen];
+  _excep_t rtnarr[rearrange];
   _excep_t *rtn = rtnarr;
 
-  for (register int i = 0; i < rtnlen; i ++)
+  for (register int i = 0; i < rearrange; i ++)
     {
       rtnarr[i] = _excep_arr[i];
     }
@@ -153,20 +129,26 @@ exception_getallexcep()
   return rtn;
 }
 
-excep_return_e
-exception_findexcep_byname(char *excep_name)
+int
+exception_findexcep_byname(const char *excep_name)
 {
   fail(_excep_arr, ABNORMAL);
   fail(excep_name, FAILED);
 
-  _exception_nullchk();
-
-  _exception_buffersize_chk(excep_name);
+  _exception_buffersize_chk((char *)excep_name);
 
   for (register int i = 0; i < _excep_arr_len - 1; i ++)
     {
+      int match = _exception_quick_match_str(excep_name, _excep_arr[i]._name,
+                                             true);
+      /* Once failed, fail. */
+      if (match == FAILED)
+        {
+          return FAILED;
+        }
+
       /* Once matched, return the index. */
-      if (_exception_quick_match_str(excep_name, _excep_arr[i]._name, true))
+      if (match == IDENTICAL)
         {
           return i;
         }
@@ -174,12 +156,10 @@ exception_findexcep_byname(char *excep_name)
   return MISSING;
 }
 
-excep_return_e
+int
 exception_findexcep_byid(int id)
 {
   fail(_excep_arr, ABNORMAL);
-
-  _exception_nullchk();
 
   if (id < 0)
     {
@@ -197,17 +177,15 @@ exception_findexcep_byid(int id)
   return MISSING;
 }
 
-excep_return_e
+int
 exception_findexcep_byit(_excep_t e)
 {
   fail(_excep_arr, ABNORMAL);
   fail(&e, FAILED);
 
-  _exception_nullchk();
-
-  if (exception_cmp(&e, (_excep_t*)excep_nullptr))
+  if (exception_cmp(&e, (_excep_t*)excep_nullptr) == IDENTICAL)
     {
-      return EXCEP_NULL;
+      return FAILED;
     }
 
   for (register int i = 0; i < _excep_arr_len - 1; i ++)
@@ -222,18 +200,16 @@ exception_findexcep_byit(_excep_t e)
   return MISSING;
 }
 
-excep_return_e
+int
 _exception_iteration_last()
 {
   fail(_excep_arr, ABNORMAL);
-
-  _exception_nullchk();
 
   int rtn = -1;
   for (register int i = _excep_arr_len - 1; i >= 0; i --)
     {
       /* Finding non-null elements, mark on. */
-      if (&_excep_arr[i] != NULL)
+      if (exception_cmp(&_excep_arr[i], (_excep_t *)excep_nullptr) != IDENTICAL)
         {
           rtn = i;
         }
@@ -242,18 +218,16 @@ _exception_iteration_last()
   return rtn;
 }
 
-excep_return_e
+int
 _exception_iteration_first()
 {
   fail(_excep_arr, ABNORMAL);
-
-  _exception_nullchk();
 
   int rtn = -1;
   for (register int i = 0; i < _excep_arr_len; i ++)
     {
       /* Finding non-null elements, mark on. */
-      if (&_excep_arr[i] != NULL)
+      if (exception_cmp(&_excep_arr[i], (_excep_t*)excep_nullptr) != IDENTICAL)
         {
           rtn = i;
         }
@@ -267,14 +241,14 @@ _exception_rearrangement()
 {
   fail(_excep_arr, ABNORMAL);
 
-  _exception_nullchk();
-
   _excep_t tmp[_excep_arr_len];
 
   int tmp_index = 0;
   for (int arr_index = 0; arr_index < _excep_arr_len; arr_index ++)
     {
-      if (exception_cmp(&_excep_arr[arr_index], (_excep_t *)excep_nullptr) == 0)
+      /* Continue once empty */
+      if (exception_cmp(&_excep_arr[arr_index],
+                        (_excep_t *)excep_nullptr) == IDENTICAL)
         {
           continue;
         }
@@ -312,11 +286,15 @@ _exception_rearrangement_inplace()
 {
   fail(_excep_arr, ABNORMAL);
 
-  _exception_nullchk();
-
   /* Ensure target is not just a whole empty array, or a full filled array. */
   int first = _exception_iteration_first();
   int last = _exception_iteration_last();
+
+  trans(first, FAILED);
+  trans(first, ABNORMAL);
+  trans(last, FAILED);
+  trans(last, ABNORMAL);
+
   /* If _excep_arr is just empty on the whole, or have been full filled,
      return normally. */
   if (first == CONDITIONAL || last == CONDITIONAL)
@@ -380,13 +358,14 @@ _exception_rearrangement_inplace()
   return cnt;
 }
 
-excep_return_e
-_exception_quick_match_str(char *a, char *b, bool capital_restricted)
+int
+_exception_quick_match_str(const char *a, const char *b,
+                           bool capital_restricted)
 {
+
   fail(_excep_arr, ABNORMAL);
   fail(a, FAILED);
   fail(b, FAILED);
-  fail(&capital_restricted, FAILED);
 
   const unsigned long lenA = strlen(a);
   const unsigned long lenB = strlen(b);
@@ -394,28 +373,44 @@ _exception_quick_match_str(char *a, char *b, bool capital_restricted)
   /* Check length */
   if (lenA != lenB)
     {
-      return false;
+      return DIFFERENT;
     }
 
   for (register unsigned long i = 0; i < lenA; i ++)
     {
       if (_exception_capital_check(a[i], b[i], capital_restricted) == NORMAL)
         {
-          return false;
+          return DIFFERENT;
         }
     }
-  return true;
+  return IDENTICAL;
 }
 
-excep_return_e
+int
 _exception_capital_check(char a, char b, bool capital_restricted)
 {
   fail(_excep_arr, ABNORMAL);
 
-  return ((capital_restricted) ? (a == b) : ((a - b) == ('a' - 'A')));
+  return ((capital_restricted) ? (a == b) : ((a - b) == ('a' - 'A'))
+          ? IDENTICAL
+          : DIFFERENT);
 }
 
-excep_return_e
+int
+_exception_buffersize_chk(char *buff)
+{
+  fail(buff, FAILED);
+
+  if (strlen((const char *)buff) > EXCEP_BUFF_MAX)
+    {
+      THROW(&(_excep_t){"BufferOverflowException", "", BufferOverflowException},
+            __FILE__, __LINE__, __FUNCTION__, EXCEP_FMT);
+    }
+
+  return NORMAL;
+}
+
+int
 _exception_swap(_excep_t *a, _excep_t *b)
 {
   fail(a, FAILED);
