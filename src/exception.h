@@ -99,7 +99,7 @@ typedef struct _excep_S
 static const _excep_t excep_null = (_excep_t){"", "", 0};
 static const _excep_t *excep_nullptr = &excep_null;
 
-static _excep_t _excep_arr[EXCEP_ARRAY_MAX] = {};
+static _excep_t _excep_arr[EXCEP_ARRAY_MAX] = {  };
 static const int _excep_arr_len = EXCEP_ARRAY_MAX;;
 
 /* Compare two exception by their ID;
@@ -107,19 +107,13 @@ static const int _excep_arr_len = EXCEP_ARRAY_MAX;;
    Returns |IDENTICAL once A = B;
            |GREATER   once A > B;
            |LESS      once A < B; */
-static inline int
-exception_cmp(_excep_t *a, _excep_t *b)
-{
-  fail(a, FAILED);
-  fail(b, FAILED);
-
-  return ((a->_id > b->_id) ? GREATER : (a->_id == b->_id) ? IDENTICAL : LESS);
-}
+int
+exception_cmp(_excep_t *a, _excep_t *b);
 
 /* By specifying the name & the description & the ID, an exception can be added
-   once no same exception exists in advance.
-   Fails once any given parameter was null.
-   Returns |index to the exception added;
+     once no same exception exists in advance.
+   Fails once any given parameter was null, except $id.
+   Returns |index to the exception being added;
            |CONDITIONAL once _excep_arr was full;
            |DUPLICATED once _excep_arr had a same element;
            |ABNORMAL once $_excep_arr was null;
@@ -130,7 +124,7 @@ exception_addexcep(const char *excep_name, const char *description, int id);
 
 /* By specifying the name, an exception can be removed once it exists.
    Fails once any given parameter was null.
-   Returns |index to the exception removed;
+   Returns |index to the exception being removed;
            |MISSING once _excep_arr had no desired exception;
            |CONDITIONAL once _excep_arr was empty;
            |FAILED once id < 0;
@@ -141,8 +135,7 @@ int
 exception_removeexcep_byname(const char *excep_name);
 
 /* By specifying the id, an exception can be removed once it exists.
-   Fails once any given parameter was null.
-   Returns |index to the exception removed;
+   Returns |index to the exception being removed;
            |MISSING once _excep_arr had no desired exception;
            |CONDITIONAL once _excep_arr was empty;
            |ABNORMAL once $_excep_arr was null;
@@ -159,7 +152,7 @@ exception_getallexcep();
 
 /* Find desired exception with its name;
    Fails once any given parameter was null.
-   Returns |index of the exception found;
+   Returns |index of the exception being found;
            |MISSING once NOT found;
            |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException;
@@ -169,7 +162,7 @@ exception_findexcep_byname(const char *excep_name);
 
 /* Find desired exception with its ID;
    Fails once any given parameter was null.
-   Returns |index of the exception found;
+   Returns |index of the exception being found;
            |MISSING once NOT found;
            |ABNORMAL once $_excep_arr was null;
    Throws BufferOverflowException;
@@ -207,15 +200,15 @@ int
 _exception_iteration_first();
 
 /* Rearrange whole array to make all the elements listed in near-by.
-   Returns |Real length of _excep_arr after rearrangement;
+   Returns |real length of _excep_arr after rearrangement;
            |ABNORMAL once $_excep_arr was null;
    Throws InvalidNullPointerException; */
 int
 _exception_rearrangement();
 
 /* Rearrange whole array to make all the elements listed in near-by without
-   extra space used.
-   Returns |Real length of _excep_arr after rearrangement;
+     extra space used.
+   Returns |real length of _excep_arr after rearrangement;
            |ABNORMAL once $_excep_arr was null;
    Throws InvalidNullPointerException; */
 int
@@ -224,20 +217,23 @@ _exception_rearrangement_inplace();
 /* Compare A and B in a quick way.
    That is, once single character does not match, it stops following operations.
    Fails once any given parameter was null, except $capital_restricted.
+   Transacts |FAILED   from _exception_capital_check(char, char, bool);
+             |ABNORMAL from _exception_capital_check(char, char, bool);
    Returns |IDENTICAL once matched;
            |DIFFERENT once did not match. */
 int
 _exception_quick_match_str(const char *a, const char *b,
                            bool capital_restricted);
 
-/* Check wether the characters are exactly the same by comparing ASCII value;
-   Returns |IDENTICAL once A is exactly the same as B.
-           |DIFFERENT once A is not exactly the same as B. */
+/* Check whether the characters are exactly the same by comparing their ASCII
+     values;
+   Returns |IDENTICAL once A is exactly the same as B;
+           |DIFFERENT once A is not exactly the same as B; */
 int
 _exception_capital_check(char a, char b, bool capital_restricted);
 
 /* This function specifically throw BufferOverflowException once given
-   BUFF is longer than EXCEP_BUFF_MAX.
+     BUFF is longer than EXCEP_BUFF_MAX.
    Fails once any given parameter was null.
    Returns |FAILED   once failed passing through macro "fail";
            |ABNORMAL once $_excep_arr was null;

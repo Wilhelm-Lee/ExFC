@@ -29,7 +29,6 @@ exception_addexcep(const char *excep_name, const char *description, int id)
   fail(_excep_arr, ABNORMAL);
   fail(excep_name, FAILED);
   fail(description, FAILED);
-  fail(&id, FAILED);
 
   _exception_buffersize_chk((char *)excep_name);
   _exception_buffersize_chk((char *)description);
@@ -94,7 +93,6 @@ exception_removeexcep_byid(int id)
     }
 
   fail(_excep_arr, ABNORMAL);
-  fail(&id, FAILED);
 
   /* Find the desired exception */
   int byid = exception_findexcep_byid(id);
@@ -142,10 +140,7 @@ exception_findexcep_byname(const char *excep_name)
       int match = _exception_quick_match_str(excep_name, _excep_arr[i]._name,
                                              true);
       /* Once failed, fail. */
-      if (match == FAILED)
-        {
-          return FAILED;
-        }
+      trans(match, FAILED);
 
       /* Once matched, return the index. */
       if (match == IDENTICAL)
@@ -190,9 +185,13 @@ exception_findexcep_byit(_excep_t e)
 
   for (register int i = 0; i < _excep_arr_len - 1; i ++)
     {
+      const int match = _exception_quick_match_str(e._name, _excep_arr[i]._name,
+                                                   true);
+
+
+
       /* Once matched, return the index. */
-      if (_exception_quick_match_str(e._name, _excep_arr[i]._name, true)
-          && (e._id == _excep_arr[i]._id))
+      if (match == IDENTICAL && (e._id == _excep_arr[i]._id))
         {
           return i;
         }
@@ -208,8 +207,12 @@ _exception_iteration_last()
   int rtn = -1;
   for (register int i = _excep_arr_len - 1; i >= 0; i --)
     {
+      const int cmp = exception_cmp(&_excep_arr[i], (_excep_t *)excep_nullptr);
+
+      trans(cmp, FAILED);
+
       /* Finding non-null elements, mark on. */
-      if (exception_cmp(&_excep_arr[i], (_excep_t *)excep_nullptr) != IDENTICAL)
+      if (cmp != IDENTICAL)
         {
           rtn = i;
         }
@@ -226,8 +229,12 @@ _exception_iteration_first()
   int rtn = -1;
   for (register int i = 0; i < _excep_arr_len; i ++)
     {
+      const int cmp = exception_cmp(&_excep_arr[i], (_excep_t*)excep_nullptr);
+
+      trans(cmp, FAILED);
+
       /* Finding non-null elements, mark on. */
-      if (exception_cmp(&_excep_arr[i], (_excep_t*)excep_nullptr) != IDENTICAL)
+      if (cmp != IDENTICAL)
         {
           rtn = i;
         }
@@ -246,9 +253,13 @@ _exception_rearrangement()
   int tmp_index = 0;
   for (int arr_index = 0; arr_index < _excep_arr_len; arr_index ++)
     {
+      const int cmp = exception_cmp(&_excep_arr[arr_index],
+                              (_excep_t *)excep_nullptr);
+
+      trans(cmp, FAILED);
+
       /* Continue once empty */
-      if (exception_cmp(&_excep_arr[arr_index],
-                        (_excep_t *)excep_nullptr) == IDENTICAL)
+      if (cmp == IDENTICAL)
         {
           continue;
         }
@@ -287,8 +298,8 @@ _exception_rearrangement_inplace()
   fail(_excep_arr, ABNORMAL);
 
   /* Ensure target is not just a whole empty array, or a full filled array. */
-  int first = _exception_iteration_first();
-  int last = _exception_iteration_last();
+  const int first = _exception_iteration_first();
+  const int last = _exception_iteration_last();
 
   trans(first, FAILED);
   trans(first, ABNORMAL);
@@ -308,16 +319,19 @@ _exception_rearrangement_inplace()
   for (register int i = 1; i < _excep_arr_len; i ++)
     {
       /* A not empty element */
-      int compare_this = exception_cmp(&_excep_arr[i],
-                                       (_excep_t *)excep_nullptr);
-      int compare_prev = exception_cmp(&_excep_arr[i - 1],
-                                       (_excep_t *)excep_nullptr);
+      int cmp_this = exception_cmp(&_excep_arr[i],
+                                   (_excep_t *)excep_nullptr);
+      int cmp_prev = exception_cmp(&_excep_arr[i - 1],
+                                   (_excep_t *)excep_nullptr);
 
       /* While the previous element is empty. */
-      if (compare_this != 0 && compare_prev == 0)
+      if (cmp_this != 0 && cmp_prev == 0)
         {
           /* Move this element backwards for one. */
-          _exception_swap(&_excep_arr[i], &_excep_arr[i - 1]);
+          const int swap = _exception_swap(&_excep_arr[i], &_excep_arr[i - 1]);
+
+          trans(swap, FAILED);
+
           /* Record current index */
           record_before_following = i;
           /* Follow up */
@@ -325,7 +339,7 @@ _exception_rearrangement_inplace()
         }
 
       /* While ALL of those two were NOT empty. */
-      if (compare_this != 0 && compare_prev != 0)
+      if (cmp_this != 0 && cmp_prev != 0)
         {
           /* Go back to marked index if possible. */
           if (record_before_following > i)
@@ -337,7 +351,7 @@ _exception_rearrangement_inplace()
         }
 
       /* While ALL of those two were empty. */
-      if (compare_this == 0 && compare_prev == 0)
+      if (cmp_this == 0 && cmp_prev == 0)
         {
           /* If it was because of reaching at the end. */
           if (i == _excep_arr_len)
@@ -350,7 +364,7 @@ _exception_rearrangement_inplace()
         }
 
       /* While this element is empty. */
-      if (compare_this == 0 && compare_prev != 0)
+      if (cmp_this == 0 && cmp_prev != 0)
         {
           cnt += 1;
         }
@@ -378,7 +392,12 @@ _exception_quick_match_str(const char *a, const char *b,
 
   for (register unsigned long i = 0; i < lenA; i ++)
     {
-      if (_exception_capital_check(a[i], b[i], capital_restricted) == NORMAL)
+      const int check = _exception_capital_check(a[i], b[i],
+                                                 capital_restricted);
+
+      trans(check, ABNORMAL);
+
+      if (check == NORMAL)
         {
           return DIFFERENT;
         }
@@ -408,6 +427,15 @@ _exception_buffersize_chk(char *buff)
     }
 
   return NORMAL;
+}
+
+int
+exception_cmp(_excep_t *a, _excep_t *b)
+{
+  fail(a, FAILED);
+  fail(b, FAILED);
+
+  return ((a->_id > b->_id) ? GREATER : (a->_id == b->_id) ? IDENTICAL : LESS);
 }
 
 int

@@ -43,3 +43,18 @@ ____ ____ Since the only problem(probably) it to change the logic on returning,
 ____ ____ __ this problem could be solved.  
 <h4 align="right">-- William Pascal</h4>
 ________________________________________________________________________________
+
+\[23th May, 2023 23:52:32\] (William)  
+Now working on:  
+____ Testing current existing functionalities.  
+Finished:  
+____ Fixing previous issue about receiving wrong return code from functions  
+____ __ such as "`exception_addexcep(char*, char*, int)`".  
+____ It is now returning `FAILED -> -400` as expected from testing context.  
+More to be done:  
+____ Realising functions:  
+____ __ I. "`CATCH(?):?`"  
+____ __ II. "`OVER(?):?`"  
+____ Keep testing, polishing ExFC.
+<h4 align="right">-- William Pascal</h4>
+________________________________________________________________________________
