@@ -1,0 +1,392 @@
+/**
+ *     This file is part of project <https://github.com/Wilhelm-Lee/ExFC>
+ *     Copyright (C) 2022 - 2023  William Lee
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If NOT, see <https://www.gnu.org/licenses/>.
+ *
+ * @file exfc.h
+ * @brief ExFC header file. Contains declarations to exceptions and operational
+ *        functionalities.
+ * @version Alpha 0.0.0
+ * @author William Lee
+ */
+
+#ifndef EXFC_H
+# define EXFC_H
+
+# include <stdarg.h>
+# include <stdbool.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+
+# ifdef __cplusplus
+__BEGIN_DECLS
+# endif /* __cplusplus */
+
+/* par1="Exception"=_excep_t;
+   par2="File"=__FILE__;
+   par3="Line"=__LINE__;
+   par4="Function"=__FUNCTION__ */
+static const char *__restrict__ EXCEP_FMT =
+"Threw the %s:\n\tat %s:%ld, func %s\n\"%s\"\n";
+static const char *__restrict__ DEF_EXCEP_FMT = "Threw the %s\n";
+
+# ifndef EXCEP_BUFF_MAX
+#  define EXCEP_BUFF_MAX 4096
+# endif /* NO EXCEP_BUFF_MAX */
+
+# ifndef EXCEP_ARRAY_MAX
+#  define EXCEP_ARRAY_MAX 511
+# endif /* NO EXCEP_ARRAY_MAX */
+
+# ifndef EXCEP_ID_OFFSET
+#  define EXCEP_ID_OFFSET 1
+# endif /* NO EXCEP_ID_OFFSET */
+
+/**
+ * @enum An enumeration indicates the results to exceptions' comparisons.
+ */
+typedef enum excep_compare_E
+{
+  LESS          = -4,
+  GREATER       = -3,
+  DIFFERENT     = -2,
+  IDENTICAL     = -1,
+} excep_compare_e;
+
+/**
+ * @enum An enumeration indicates the result to common operations to exceptions.
+ */
+typedef enum excep_return_E
+{
+  /** @brief Target was not found. */
+  MISSING       = -600,
+  /** @brief Certain conditions were not satisfied. */
+  CONDITIONAL   = -500,
+  /** @brief Failed passing through macro "fail". */
+  FAILED        = -400,
+  /** @brief Target holds the same element. */
+  DUPLICATED    = -300,
+  /** @brief Has an error occurred. */
+  ABNORMAL      = -200,
+  /** @brief Normally proceeded with no error occurred. */
+  NORMAL        = -100,
+
+} excep_return_e;
+
+/**
+ * @brief Return $n as the return value, once $o is NULL
+ * @return given $n as the return value
+ * @note "fails" stands for "Fails on Null Check"
+ * @note 'o' stands for "Object"
+ * @note 'n' stands for "Numeric on Return"
+ */
+# define fails(o, n) {if ((o) == NULL) return (n);}
+
+/**
+ * @brief Return $e as the return value, once $v eqauls $e
+ * @return given $e as the return value
+ * @note "trans" stands for "Transites Error Code to Caller"
+ * @note 'v' stands for "Value"
+ * @note 'e' stands for "Error Code"
+ */
+# define trans(v, e) {if ((v) == (e)) return (e);}
+
+/**
+ * @brief Evaluate given statement while the ptr to $s is not NULL
+ * @return given $n as the return value
+ * @note "state" stands for "Statement Evaluation"
+ * @note 's' stands for "Statement"
+ * @note 'n' stands for "Numeric on Return"
+ */
+# define state(s, n) {if (#s) && (s != NULL)) return (n);}
+
+/**
+ * @enum An enumeration declares all predefined exceptions.
+ */
+typedef enum _excep_E
+{
+  Exception = EXCEP_ID_OFFSET,
+  InstanceFailureException,
+  IllegalMemoryAccessException,
+  InvalidArgumentException,
+  OutOfBoundException,
+  InvalidNullPointerException,
+  OutOfMemoryException,
+  BufferOverflowException
+} excep_e;
+
+/**
+ * \struct _excep_S src/exfc.h exfc.h
+ */
+typedef struct _excep_S
+{
+  char *_name;
+  char *_description;
+  int _id;
+} __attribute__((packed)) _excep_t;
+
+//static const _excep_t excep_null = (_excep_t){"", "", 0};
+//static const _excep_t *excep_nullptr = &excep_null;
+
+# define excep_null ((_excep_t){"", "", 0})
+# define excep_nullptr (&excep_null)
+
+static _excep_t _excep_arr[EXCEP_ARRAY_MAX] = {0};
+static const int _excep_arr_len = EXCEP_ARRAY_MAX;
+
+/**
+ * @brief Compare two exception by their ID;
+ * @param a The first exception to be compared.
+ * @param b The second exception to be compared.
+ * @note Fails once any given parameter was null;
+ * @return @b IDENTICAL once $A = $B;\n
+ *         @b GREATER   once $A > $B;\n
+ *         @b LESS      once $A < $B;
+ */
+int
+exfc_cmp(_excep_t *a, _excep_t *b);
+
+/**
+ * @brief By specifying the name & the description & the ID, an exception can
+ *        be added once no same exception exists in advance.
+ * @param name Name to the exception being added.
+ * @param description Description to the exception being added.
+ * @param id ID to the exception being added.
+ * @note Fails once any given parameter was null, except $id.
+ * @return Index to the exception being added;\n
+ *         @b CONDITIONAL once $_excep_arr was full;\n
+ *         @b DUPLICATED  once $_excep_arr had a same element;\n
+ *         @b ABNORMAL    once $_excep_arr was null;
+ * @exception BufferOverflowException
+ * @exception InvalidNullPointerException
+ */
+int
+exfc_addexcep(const char *name, const char *description, int id);
+
+/* For test only. */
+int
+_exfc_addexcep_test(const void *name, const void *description, int id);
+
+/**
+ * @brief By specifying the name, an exception can be removed once it exists.
+ * @param name The name used to search for desired exception to be removed.
+ * @note Fails once any given parameter was null.
+ * @return Index to the exception being removed;\n
+ *         @b MISSING     once $_excep_arr had no desired exception;\n
+ *         @b CONDITIONAL once $_excep_arr was empty;\n
+ *         @b FAILED      once $id < 0;\n
+ *         @b ABNORMAL    once $_excep_arr was null;
+ * @exception BufferOverflowException
+ * @exception InvalidNullPointerException
+ */
+int
+exfc_removeexcep_byname(const char *name);
+
+/**
+ * @brief By specifying the id, an exception can be removed once it exists.
+ * @param id The ID used to search for desired exception to be removed.
+ * @return Index to the exception being removed;\n
+ *         @b MISSING     once $_excep_arr had no desired exception;\n
+ *         @b CONDITIONAL once $_excep_arr was empty;\n
+ *         @b ABNORMAL    once $_excep_arr was null;
+ * @exception BufferOverflowException
+ * @exception InvalidNullPointerException
+ */
+int
+exfc_removeexcep_byid(int id);
+
+/**
+ * @brief Return all exceptions.
+ * @return A pointer towards $_excep_arr;\n
+ *         $excep_nullptr once _excep_arr is NULL;
+ * @exception InvalidNullPointerException
+ */
+_excep_t *
+exfc_getallexcep();
+
+/**
+ * @brief Find desired exception with its name;
+ * @param name The name used to search for desired exception.
+ * @note Fails once any given parameter was null.
+ * @return Index of the exception being found;\n
+ *         @b MISSING  once NOT found;\n
+ *         @b ABNORMAL once $_excep_arr was null;
+ * @exception BufferOverflowException
+ * @exception InvalidNullPointerException
+ */
+int
+exfc_getindex_byname(const char *name);
+
+/**
+ * @brief Find desired exception with its ID;
+ * @param name The ID used to search for desired exception.
+ * @note Fails once any given parameter was null.
+ * @return Index of the exception being found;\n
+ *         @b MISSING  once NOT found;\n
+ *         @b ABNORMAL once $_excep_arr was null;
+ * @exception BufferOverflowException
+ * @exception InvalidNullPointerException
+ */
+int
+exfc_getindex_byid(int id);
+
+/**
+ * @brief Iterate through every element in $_excep_arr, util find specified
+ *        exception.
+ * @param e The exception used to search for desired exception.
+ * @note Fails once any given parameter was null.
+ * @return Index of matched exception;\n
+ *         @b CONDITIONAL once $e was excep_null, which is not allowed to
+ *                        operate on it;\n
+ *         @b MISSING     once NOT found;\n
+ *         @b FAILED      once id < 0;
+ *                        once operating target is $excep_null;\n
+ *         @b ABNORMAL    once $_excep_arr was null;
+ * @exception InvalidNullPointerException
+ */
+int
+exfc_getindex_byexcep(_excep_t e);
+
+/**
+ * @brief Iterate through every element in $_excep_arr, util find the last
+ *        exception.
+ * @return Index of matched exception;\n
+ *         @b CONDITIONAL once $_excep_arr was empty;\n
+ *         @b ABNORMAL    once $_excep_arr was null;
+ * @exception InvalidNullPointerException
+ */
+int
+_exfc_iteration_last();
+
+/**
+ * @brief Iterate through every element in $_excep_arr, util find the first
+ *        exception.
+ * @return Index of matched exception;\n
+ *         @b CONDITIONAL once $_excep_arr was empty;\n
+ *         @b ABNORMAL    once $_excep_arr was null;
+ * @exception InvalidNullPointerException
+ */
+int
+_exfc_iteration_first();
+
+/**
+ * @brief Rearrange whole array to make all the elements listed near-by.
+ * @return Real length of _excep_arr after rearrangement;\n
+ *         @b ABNORMAL once $_excep_arr was null;
+ * @exception InvalidNullPointerException
+ */
+int
+_exfc_rearrangement();
+
+/**
+ * @brief Rearrange whole array to make all the elements listed near-by without
+ *   an extra array used.
+ * @return Real length of $_excep_arr after rearrangement;\n
+ *         @b ABNORMAL once $_excep_arr was null;
+ * @exception InvalidNullPointerException
+ */
+int
+_exfc_rearrangement_inplace();
+
+/**
+ * @brief Compare string $A and string $B in a quick way.\n
+ * @param a The first string to be compared.
+ * @param b The second string to be compared.
+ * @param capital_restricted Specify whether to restrict on capitalisation.
+ * That is, once single character does not match, it stops following operations.
+ * @note Fails once any given parameter was null. except $capital_restricted.
+ * @note Transacts FAILED    from _exfc_capital_check(char, char, bool);\n
+ *                 ABNORMAL  from _exfc_capital_check(char, char, bool);
+ * @return @b IDENTICAL once matched;\n
+ *         @b DIFFERENT once did not match.
+ */
+int
+_exfc_quick_match_str(const char *a, const char *b,
+                      bool capital_restricted);
+
+/**
+ * @brief Check whether the characters are exactly the same by comparing their
+ *        ASCII values.
+ * @param a The first letter to be checked.
+ * @param b The second letter to be checked.
+ * @param capital_restricted Specify whether to restrict on capitalisation.
+ * @return @b IDENTICAL once $A is exactly the same as $B;\n
+ *         @b DIFFERENT once $A is not exactly the same as $B;
+ */
+int
+_exfc_capital_check(char a, char b, bool capital_restricted);
+
+/**
+ * @brief This function specifically throw BufferOverflowException once given
+ *        BUFF is longer than $EXCEP_BUFF_MAX.
+ * @param buff The buffer to be cechecked.
+ * @note Fails once any given parameter was null.
+ * @return @b FAILED   once failed passing through macro "fail";\n
+ *         @b ABNORMAL once $_excep_arr was null;\n
+ *         @b NORMAL   once normally proceeded with no error occurred;\n
+ * @exception BufferOverflowException
+ * @exception InvalidNullPointerException
+ */
+int
+_exfc_buffersize_chk(char *buff);
+
+/**
+ * @brief Swap specified two element from $_excep_arr;
+ * @param a The first partial exception to be swapped.
+ * @param a The second partial exception to be swapped.
+ * @note Fails once any given parameter was null;
+ * @return @b FAILED once failed passing through macro "fail";\n
+ *         @b NORMAL normally proceeded with no error occurred;
+ */
+int
+_exfc_swap(_excep_t *a, _excep_t *b);
+
+/**
+ * @brief The one of operations to the exceptions, THROW.
+ * @param e The exception specified to be thrown.
+ * @param _file_ The macro __file__ provided under promise on calling.
+ * @param _line_ The macro __line__ provided under promise on calling.
+ * @param _function_ The macro __function__ provided under promise on calling.
+ * @param FMT The format to variadic list used on outputting.
+ */
+__attribute__((noreturn))
+static inline void
+THROW(_excep_t *e, const char *__restrict__ _file_, long int _line_,
+      const char *__restrict__ _function_, const char *__restrict__ FMT)
+{
+  if (FMT == NULL)
+    {
+      (void)fprintf(stderr, DEF_EXCEP_FMT, e->_name);
+      exit(e->_id); // Try using memctl (credit: Wilhelm Lee) to solve such issues by retracing back to caller.
+    }
+
+  (void)fprintf(stderr, ((_file_ == NULL && _line_ == -1 && _function_ == NULL)
+                         ? DEF_EXCEP_FMT
+                         /* Ignore _FMT when outputting the exception title.
+                         Use _EXCEP_FMT instead. */
+                         : EXCEP_FMT), e->_name, _file_, _line_, _function_,
+                                       e->_description);
+
+  exit(e->_id);
+
+}
+
+# ifdef __cplusplus
+__END_DECLS
+# endif /* __cplusplus */
+
+#endif /* NO EXFC_H */
+

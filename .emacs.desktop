@@ -1,0 +1,79 @@
+;; -*- mode: emacs-lisp; lexical-binding:t; coding: utf-8-emacs; -*-
+;; --------------------------------------------------------------------------
+;; Desktop File for Emacs
+;; --------------------------------------------------------------------------
+;; Created Sun Jul 23 22:53:32 2023
+;; Desktop file format version 208
+;; Emacs version 28.2
+
+;; Global section:
+(setq desktop-saved-frameset [frameset 1 (25789 16108 127619 241000) (desktop . "208") "william@BF" nil nil ((((minibuffer . t) (tty-type . "xterm-256color") (tty . "/dev/tty") (display-type . color) (background-mode . dark) (background-color . "#2e3436") (foreground-color . "#eeeeec") (font . "tty") (height . 62) (width . 240) (modeline . t) (unsplittable) (menu-bar-lines . 1) (tab-bar-lines . 0) (frameset--id . "1F46-F051-1FD3-9C9C") (frameset--mini t)) ((min-height . 8) (min-width . 20) (min-height-ignore . 4) (min-width-ignore . 9) (min-height-safe . 2) (min-width-safe . 4) (min-pixel-height . 8) (min-pixel-width . 20) (min-pixel-height-ignore . 4) (min-pixel-width-ignore . 9) (min-pixel-height-safe . 2) (min-pixel-width-safe . 4)) hc (pixel-width . 240) (pixel-height . 61) (total-width . 240) (total-height . 61) (normal-height . 1.0) (normal-width . 1.0) (combination-limit) (vc (pixel-width . 120) (pixel-height . 61) (total-width . 120) (total-height . 61) (normal-height . 1.0) (normal-width . 0.5) (combination-limit) (leaf (pixel-width . 120) (pixel-height . 30) (total-width . 120) (total-height . 30) (normal-height . 0.5) (normal-width . 1.0) (buffer "exfc.h" (selected . t) (hscroll . 0) (fringes 0 0 nil nil) (margins 3) (scroll-bars nil 0 t nil 0 t nil) (vscroll . 0) (dedicated) (point . 10149) (start . 10149)) (prev-buffers ("test.c" 1 1833) ("Makefile" 1 1) ("ExFC" 1 1235) ("*scratch*" 1 146))) (leaf (last . t) (pixel-width . 120) (pixel-height . 31) (total-width . 120) (total-height . 31) (normal-height . 0.5) (normal-width . 1.0) (buffer "exfc.c" (selected) (hscroll . 0) (fringes 0 0 nil nil) (margins 3) (scroll-bars nil 0 t nil 0 t nil) (vscroll . 0) (dedicated) (point . 5448) (start . 5448)) (prev-buffers ("exfc.c" 6623 6623) ("exfc.h" 1 1)))) (vc (last . t) (pixel-width . 120) (pixel-height . 61) (total-width . 120) (total-height . 61) (normal-height . 1.0) (normal-width . 0.5) (combination-limit) (leaf (pixel-width . 120) (pixel-height . 30) (total-width . 120) (total-height . 30) (normal-height . 0.5) (normal-width . 1.0) (buffer "Makefile" (selected) (hscroll . 0) (fringes 0 0 nil nil) (margins 2) (scroll-bars nil 0 t nil 0 t nil) (vscroll . 0) (dedicated) (point . 1) (start . 1))) (leaf (last . t) (pixel-width . 120) (pixel-height . 31) (total-width . 120) (total-height . 31) (normal-height . 0.5) (normal-width . 1.0) (buffer "test.c" (selected) (hscroll . 0) (fringes 0 0 nil nil) (margins 2) (scroll-bars nil 0 t nil 0 t nil) (vscroll . 0) (dedicated) (point . 1833) (start . 1349)) (prev-buffers ("Makefile" 1 1))))))])
+(setq desktop-missing-file-warning nil)
+(setq tags-file-name nil)
+(setq tags-table-list nil)
+(setq search-ring nil)
+(setq regexp-search-ring nil)
+(setq register-alist nil)
+(setq file-name-history '("~/Documents/Projects/ExFC" "~/Documents/Projects/ExFC/src/exfc.c" "~/Documents/Projects/ExFC/src/exfc.h" "~/Documents/Projects/ExFC/src/test.c" "~/Documents/Projects/ExFC"))
+
+;; Buffer section -- buffers listed in same order as in buffer list:
+(desktop-create-buffer 208
+  "/home/william/Documents/Projects/ExFC/src/exfc.h"
+  "exfc.h"
+  'c-mode
+  '(abbrev-mode eldoc-mode linum-mode flymake-mode)
+  10149
+  '(1 nil)
+  nil
+  nil
+  '((buffer-display-time 25789 16102 333073 134000) (buffer-file-coding-system . undecided-unix))
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  "/home/william/Documents/Projects/ExFC/src/test.c"
+  "test.c"
+  'c-mode
+  '(abbrev-mode eldoc-mode linum-mode flymake-mode)
+  1833
+  '(1833 nil)
+  nil
+  nil
+  '((buffer-display-time 25789 16102 333073 517000) (buffer-file-coding-system . undecided-unix))
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  "/home/william/Documents/Projects/ExFC/Makefile"
+  "Makefile"
+  'makefile-gmake-mode
+  '(linum-mode)
+  1
+  '(nil nil)
+  nil
+  nil
+  '((indent-tabs-mode . t) (buffer-display-time 25789 16102 333073 436000) (buffer-file-coding-system . undecided-unix))
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  "/home/william/Documents/Projects/ExFC/src/exfc.c"
+  "exfc.c"
+  'c-mode
+  '(abbrev-mode eldoc-mode linum-mode flymake-mode)
+  5448
+  '(7939 nil)
+  nil
+  nil
+  '((buffer-display-time 25789 16102 333073 303000) (buffer-file-coding-system . undecided-unix))
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  nil
+  "ExFC"
+  'dired-mode
+  '(linum-mode)
+  1235
+  '(nil nil)
+  t
+  '("/home/william/Documents/Projects/ExFC/")
+  '((buffer-display-time 25789 15708 976316 738000))
+  '((mark-ring nil)))
+

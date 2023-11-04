@@ -58,6 +58,11 @@ dkms.conf
 bin/
 *test*
 compile_commands.json
+doc/html/*
+doc/latex/*
 
 # Environmental
 *clangd*
+
+# Geany Project File
+*.proj

@@ -1,0 +1,169 @@
+\doxysection{exfc.\+h}
+\hypertarget{exfc_8h_source}{}\label{exfc_8h_source}\index{/home/william/Documents/Projects/ExFC/src/exfc.h@{/home/william/Documents/Projects/ExFC/src/exfc.h}}
+\mbox{\hyperlink{exfc_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#ifndef\ EXFC\_H}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#\ define\ EXFC\_H}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#\ include\ <stdarg.h>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#\ include\ <stdbool.h>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#\ include\ <stdio.h>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#\ include\ <stdlib.h>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#\ include\ <string.h>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#\ ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00038\ \_\_BEGIN\_DECLS}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#\ endif\ }\textcolor{comment}{/*\ \_\_cplusplus\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{comment}{/*\ par1="{}Exception"{}=\_excep\_t;}}
+\DoxyCodeLine{00042\ \textcolor{comment}{\ \ \ par2="{}File"{}=\_\_FILE\_\_;}}
+\DoxyCodeLine{00043\ \textcolor{comment}{\ \ \ par3="{}Line"{}=\_\_LINE\_\_;}}
+\DoxyCodeLine{00044\ \textcolor{comment}{\ \ \ par4="{}Function"{}=\_\_FUNCTION\_\_\ */}}
+\DoxyCodeLine{00045\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\_\_restrict\_\_\ EXCEP\_FMT\ =}
+\DoxyCodeLine{00046\ \textcolor{stringliteral}{"{}Threw\ the\ \%s:\(\backslash\)n\(\backslash\)tat\ \%s:\%ld,\ func\ \%s\(\backslash\)n\(\backslash\)"{}\%s\(\backslash\)"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{00047\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\_\_restrict\_\_\ DEF\_EXCEP\_FMT\ =\ \textcolor{stringliteral}{"{}Threw\ the\ \%s\(\backslash\)n"{}};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#\ ifndef\ EXCEP\_BUFF\_MAX}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#\ \ define\ EXCEP\_BUFF\_MAX\ 4096}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#\ endif\ }\textcolor{comment}{/*\ NO\ EXCEP\_BUFF\_MAX\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#\ ifndef\ EXCEP\_ARRAY\_MAX}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#\ \ define\ EXCEP\_ARRAY\_MAX\ 511}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#\ endif\ }\textcolor{comment}{/*\ NO\ EXCEP\_ARRAY\_MAX\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#\ ifndef\ EXCEP\_ID\_OFFSET}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#\ \ define\ EXCEP\_ID\_OFFSET\ 1}}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#\ endif\ }\textcolor{comment}{/*\ NO\ EXCEP\_ID\_OFFSET\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00064\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{exfc_8h_a5a5554066b43b1f314da7b6bf227b5e8}{excep\_compare\_E}}}
+\DoxyCodeLine{00065\ \{}
+\DoxyCodeLine{00066\ \ \ \mbox{\hyperlink{exfc_8h_a5a5554066b43b1f314da7b6bf227b5e8a95c736070f99b99eb80d1eac1f4ca60f}{LESS}}\ \ \ \ \ \ \ \ \ \ =\ -\/4,}
+\DoxyCodeLine{00067\ \ \ \mbox{\hyperlink{exfc_8h_a5a5554066b43b1f314da7b6bf227b5e8a25b5ca2f56d99ba6ffcb5316adac34c1}{GREATER}}\ \ \ \ \ \ \ =\ -\/3,}
+\DoxyCodeLine{00068\ \ \ \mbox{\hyperlink{exfc_8h_a5a5554066b43b1f314da7b6bf227b5e8acaed8cb8391938eee3d1222a6b5fd73d}{DIFFERENT}}\ \ \ \ \ =\ -\/2,}
+\DoxyCodeLine{00069\ \ \ \mbox{\hyperlink{exfc_8h_a5a5554066b43b1f314da7b6bf227b5e8a3b48885412d4e8bb197a2215b53d8ef7}{IDENTICAL}}\ \ \ \ \ =\ -\/1,}
+\DoxyCodeLine{00070\ \}\ \mbox{\hyperlink{exfc_8h_abece49934a9daf301c7311fe2bd618b8}{excep\_compare\_e}};}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00075\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{exfc_8h_abace101ae5cfd98c50399fc62040ffe4}{excep\_return\_E}}}
+\DoxyCodeLine{00076\ \{}
+\DoxyCodeLine{00078\ \ \ \mbox{\hyperlink{exfc_8h_abace101ae5cfd98c50399fc62040ffe4af9df03a8eddbaf877f679d9c0bf16417}{MISSING}}\ \ \ \ \ \ \ =\ -\/600,}
+\DoxyCodeLine{00080\ \ \ \mbox{\hyperlink{exfc_8h_abace101ae5cfd98c50399fc62040ffe4aa89e9c4be6ff0fa44ea400d37e7e6bf7}{CONDITIONAL}}\ \ \ =\ -\/500,}
+\DoxyCodeLine{00082\ \ \ \mbox{\hyperlink{exfc_8h_abace101ae5cfd98c50399fc62040ffe4aecedb56d1405a60c6069f4a0139bdec5}{FAILED}}\ \ \ \ \ \ \ \ =\ -\/400,}
+\DoxyCodeLine{00084\ \ \ \mbox{\hyperlink{exfc_8h_abace101ae5cfd98c50399fc62040ffe4a698b6a754ecabe5f35280479c0642b51}{DUPLICATED}}\ \ \ \ =\ -\/300,}
+\DoxyCodeLine{00086\ \ \ \mbox{\hyperlink{exfc_8h_abace101ae5cfd98c50399fc62040ffe4add7ccc352d727224d39519584ed37cd7}{ABNORMAL}}\ \ \ \ \ \ =\ -\/200,}
+\DoxyCodeLine{00088\ \ \ \mbox{\hyperlink{exfc_8h_abace101ae5cfd98c50399fc62040ffe4a50d1448013c6f17125caee18aa418af7}{NORMAL}}\ \ \ \ \ \ \ \ =\ -\/100,}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \}\ \mbox{\hyperlink{exfc_8h_ad0bffbc6e53c4ea1ff94d83be0ba3a5c}{excep\_return\_e}};}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#\ define\ fail(o,\ n)\ \{if\ ((o)\ ==\ NULL)\ return\ (n);\}}}
+\DoxyCodeLine{00093\ \textcolor{preprocessor}{\#\ define\ trans(v,\ e)\ \{if\ ((v)\ ==\ (e))\ return\ (e);\}}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00098\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2e}{\_excep\_E}}}
+\DoxyCodeLine{00099\ \{}
+\DoxyCodeLine{00100\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2ea17524a77b7673b0322cc15aa590d1e41}{Exception}}\ =\ \mbox{\hyperlink{exfc_8h_a336d0adaa6c65dd746825b289367b924}{EXCEP\_ID\_OFFSET}},}
+\DoxyCodeLine{00101\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2ea9f7bdec0eac651d5353590bc59ee6dad}{InstanceFailureException}},}
+\DoxyCodeLine{00102\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2eaab8d2d1029794767e17503896e69870f}{IllegalMemoryAccessException}},}
+\DoxyCodeLine{00103\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2ea211a20ad31c760013737354b00d80a76}{InvalidArgumentException}},}
+\DoxyCodeLine{00104\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2eab5a12ff722ed6b0220ac2caef714525a}{OutOfBoundException}},}
+\DoxyCodeLine{00105\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2ea2034ea0064d54441b3667c00ccf0656c}{InvalidNullPointerException}},}
+\DoxyCodeLine{00106\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2eaa214a1507bea9aaff0a102f31c43ffa4}{OutOfMemoryException}},}
+\DoxyCodeLine{00107\ \ \ \mbox{\hyperlink{exfc_8h_ab2189bbe3948b85f567468ffe7f6fa2eae112eb2c954f3b67582e55b995a0d3dd}{BufferOverflowException}}}
+\DoxyCodeLine{00108\ \}\ \mbox{\hyperlink{exfc_8h_a717aefdfbd0c5be9edfe93d8edbdbd93}{excep\_e}};}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00113\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct__excep__S}{\_excep\_S}}}
+\DoxyCodeLine{00114\ \{}
+\DoxyCodeLine{00115\ \ \ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{struct__excep__S_a8224755fa7b6eb8ee26267715fdd786f}{\_name}};}
+\DoxyCodeLine{00116\ \ \ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{struct__excep__S_a26655c359a5d02957ca0b970de616125}{\_description}};}
+\DoxyCodeLine{00117\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct__excep__S_a1dc0dc6f4e3e429569775895ed1d67dc}{\_id}};}
+\DoxyCodeLine{00118\ \}\ \mbox{\hyperlink{exfc_8h_a3430768a6a39bf69c2537de8f0fd8c91}{\_excep\_t}};}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \textcolor{comment}{//static\ const\ \_excep\_t\ excep\_null\ =\ (\_excep\_t)\{"{}"{},\ "{}"{},\ 0\};}}
+\DoxyCodeLine{00121\ \textcolor{comment}{//static\ const\ \_excep\_t\ *excep\_nullptr\ =\ \&excep\_null;}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \textcolor{preprocessor}{\#\ define\ excep\_null\ ((\_excep\_t)\{"{}"{}},\ "{}"{},\ 0\})}
+\DoxyCodeLine{00124\ \textcolor{preprocessor}{\#\ define\ excep\_nullptr\ (\&excep\_null)}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \textcolor{keyword}{static}\ \mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ \_excep\_arr[\mbox{\hyperlink{exfc_8h_a868679c0d7847734ffb68e1e3b789104}{EXCEP\_ARRAY\_MAX}}]\ =\ \{\};}
+\DoxyCodeLine{00127\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \_excep\_arr\_len\ =\ \mbox{\hyperlink{exfc_8h_a868679c0d7847734ffb68e1e3b789104}{EXCEP\_ARRAY\_MAX}};}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00138\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00139\ \mbox{\hyperlink{exfc_8h_a54ee6d95da6feac54fbe5d2a161f5839}{exception\_cmp}}(\mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ *a,\ \mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ *b);}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00155\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00156\ \mbox{\hyperlink{exfc_8h_a659389d7f24f2e3fc1ef241b165877c6}{exception\_addexcep}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *description,\ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \textcolor{comment}{/*\ For\ test\ only.\ */}}
+\DoxyCodeLine{00159\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00160\ \mbox{\hyperlink{exfc_8h_aa9bb792bf4ed7b8cffc89e2231feae7e}{\_exception\_addexcep\_test}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *name,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *description,\ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00174\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00175\ \mbox{\hyperlink{exfc_8h_a98230dd75f4a92aedc1bd3bd3a127d29}{exception\_removeexcep\_byname}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name);}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00187\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00188\ \mbox{\hyperlink{exfc_8h_a7c5ba84fc27c0369b6e9d9b193e994a4}{exception\_removeexcep\_byid}}(\textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00196\ \mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ *}
+\DoxyCodeLine{00197\ \mbox{\hyperlink{exfc_8h_a8ee36d86c22c3372e85000ebe272eeee}{exception\_getallexcep}}();}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00209\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00210\ \mbox{\hyperlink{exfc_8h_a9520513a85c9da17b7cad6db0b1a2dc5}{exception\_getindex\_byname}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name);}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00222\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00223\ \mbox{\hyperlink{exfc_8h_a27c139746acfeac3fd7c6fdf05751b6b}{exception\_getindex\_byid}}(\textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00239\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00240\ \mbox{\hyperlink{exfc_8h_ae90df63109aade2c1bbe604bb22da492}{exception\_getindex\_byexcep}}(\mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ e);}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00250\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00251\ \mbox{\hyperlink{exfc_8h_a3775b6ddd76862d3625dcd308239ae61}{\_exception\_iteration\_last}}();}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00261\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00262\ \mbox{\hyperlink{exfc_8h_a200bcbd339c038fca4fad00d73952954}{\_exception\_iteration\_first}}();}
+\DoxyCodeLine{00263\ }
+\DoxyCodeLine{00270\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00271\ \mbox{\hyperlink{exfc_8h_a25ba8a0a91c3a5b1648c012351eeaffa}{\_exception\_rearrangement}}();}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00280\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00281\ \mbox{\hyperlink{exfc_8h_aabb0f5d3846c78d2a4e3844df70618ad}{\_exception\_rearrangement\_inplace}}();}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00295\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00296\ \mbox{\hyperlink{exfc_8h_ab3740f5ea361fdd83a5b5a7eb084ce50}{\_exception\_quick\_match\_str}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *a,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *b,}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ capital\_restricted);}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00308\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00309\ \mbox{\hyperlink{exfc_8h_a6810e6e0d8af04a77ac3d7e2bcbf85bb}{\_exception\_capital\_check}}(\textcolor{keywordtype}{char}\ a,\ \textcolor{keywordtype}{char}\ b,\ \textcolor{keywordtype}{bool}\ capital\_restricted);}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00322\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00323\ \mbox{\hyperlink{exfc_8h_a605f2c4b853217662dc11b12bd6b1f9d}{\_exception\_buffersize\_chk}}(\textcolor{keywordtype}{char}\ *buff);}
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00333\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00334\ \mbox{\hyperlink{exfc_8h_ad6b6b1113e59c731a4ec7e1a463fe41b}{\_exception\_swap}}(\mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ *a,\ \mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ *b);}
+\DoxyCodeLine{00335\ }
+\DoxyCodeLine{00344\ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00345\ THROW(\mbox{\hyperlink{struct__excep__S}{\_excep\_t}}\ *e,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\_\_restrict\_\_\ \_file\_,\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{int}\ \_line\_,}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\_\_restrict\_\_\ \_function\_,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\_\_restrict\_\_\ FMT)}
+\DoxyCodeLine{00347\ \_\_attribute\_\_((noreturn))}
+\DoxyCodeLine{00348\ \{}
+\DoxyCodeLine{00349\ \ \ \textcolor{keywordflow}{if}\ (FMT\ ==\ NULL)}
+\DoxyCodeLine{00350\ \ \ \ \ \{}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ (void)fprintf(stderr,\ DEF\_EXCEP\_FMT,\ e-\/>\_name);}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ exit(e-\/>\_id);}
+\DoxyCodeLine{00353\ \ \ \ \ \}}
+\DoxyCodeLine{00354\ }
+\DoxyCodeLine{00355\ \ \ (void)fprintf(stderr,\ ((\_file\_\ ==\ NULL\ \&\&\ \_line\_\ ==\ -\/1\ \&\&\ \_function\_\ ==\ NULL)}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?\ DEF\_EXCEP\_FMT}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Ignore\ \_FMT\ when\ outputting\ the\ exception\ title.}}
+\DoxyCodeLine{00358\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Use\ \_EXCEP\_FMT\ instead.\ */}}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ :\ EXCEP\_FMT),\ e-\/>\_name,\ \_file\_,\ \_line\_,\ \_function\_,}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ e-\/>\_description);}
+\DoxyCodeLine{00361\ }
+\DoxyCodeLine{00362\ \ \ exit(e-\/>\_id);}
+\DoxyCodeLine{00363\ \}}
+\DoxyCodeLine{00364\ }
+\DoxyCodeLine{00365\ \textcolor{preprocessor}{\#\ ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00366\ \_\_END\_DECLS}
+\DoxyCodeLine{00367\ \textcolor{preprocessor}{\#\ endif\ }\textcolor{comment}{/*\ \_\_cplusplus\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00368\ }
+\DoxyCodeLine{00369\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ NO\ EXFC\_H\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

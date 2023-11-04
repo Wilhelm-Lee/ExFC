@@ -1,0 +1,66 @@
+Passing non-null string turns out null.
+
+## Brief
+The function stack: (Latest first)  
+(From file src/exception.c)
+```C
+_exception_quick_match_str(const char*, const char*, bool) -> int // Line 388
+exception_addexcep(const char*, const char*, int) -> int // Line 31
+```
+
+## Replay
+\**This problem was managed to be discovered by debugging.*\*  
+(From file src/test.c (git ignored))
+```C
+/* Initialise $_excep_arr */
+for (int i = 0; i < _excep_arr_len; i ++)
+  {
+    _excep_arr[i]._name = "";
+    _excep_arr[i]._description = "";
+    _excep_arr[i]._id = i;
+  }
+
+(void)fprintf(stdout, "%d\n", exception_addexcep("TestException",
+              "Animi et enim impedit voluptatem iste velit mollitia esse.", 0));
+```
+Boiling down, that function took 3 arguments.  
+ 1. "TestException"  
+ 2. "Animi et enim impedit voluptatem iste velit mollitia esse."  
+ 3. 0  
+
+Here's the declaration:  
+(From file src/exception.h)
+```C
+int
+exception_addexcep(const char *excep_name, const char *description, int id);
+```
+
+(From file src/exception.c)
+```C
+...
+int match = _exception_quick_match_str(excep_name, _excep_arr[i]._name, true);
+...
+```
+
+...  
+
+(From file src/exception.h)
+```C
+typedef struct _excep_S
+{
+  char *_name;
+  char *_description;
+  int _id;
+} __attribute__((packed)) _excep_t;
+```
+
+(From file src/test.c (git ignored))
+```C
+/* Initialise $_excep_arr */
+for (int i = 0; i < _excep_arr_len; i ++)
+  {
+    _excep_arr[i]._name = "";
+    _excep_arr[i]._description = "";
+    _excep_arr[i]._id = i;
+  }
+```
